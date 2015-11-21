@@ -18,6 +18,8 @@
 package com.rbccca;
 
 
+import com.rbccca.input.arguments.Argument;
+
 /**
  *
  * @author Ahmed Sakr
@@ -33,61 +35,92 @@ public class RBCCreditCardAnalyzer {
      */
     public static void main(String[] args) {
         String filePath = null, outputPath = "RBCCCA_stats.txt";
-        boolean outputStatistics;
+        boolean outputStatistics, userProvidedOutputPath;
 
-        switch (args.length) {
-            case 0:
-                System.out.println("No runtime arguments provided. If you need help regarding the usage of RBCCCA, "
-                        + "execute the application with \"help\" as the argument. Exiting...");
+        Argument<String> filename = new Argument<String>("filename", args, 0, String.class, "help") {
+
+            @Override
+            public void onArgumentOutOfBounds() {
+                System.out.println("The 1st argument (" + getName() + ") has not been provided. Exiting...");
                 System.exit(0);
-                break;
-            case 1:
-                if (!args[0].equalsIgnoreCase("help")) {
-                    filePath = args[0];
+            }
 
-                    if (filePath == null || filePath.isEmpty() || filePath.equalsIgnoreCase("null")) {
-                        System.out.println("No Input File has been specified in the runtime arguments. Exiting...");
-                        System.exit(0);
-                    }
+            @Override
+            public void onAbnormalArgument() {
+                System.out.println("RBCCreditCardAnalyzer requires at least one argument in order to run:"
+                        + "\n1. (Required) The path of the credit card history HTML file."
+                        + "\n2. (Optional) Boolean value of outputting the statistics. Default value: \"false\""
+                        + "\n3. (Optional) The output path for the statistics text file. Default value:" +
+                        " \"RBCCCA_stats.txt\".");
+
+                System.exit(0);
+            }
+
+            @Override
+            public void onIllegalArgument() {
+                System.out.println("The 1st argument (" + getName() + ") is an illegal filename argument. Exiting...");
+                System.exit(0);
+            }
+        };
+
+        Argument<Boolean> output = new Argument<Boolean>("should_output", args, 1, Boolean.class) {
+
+            @Override
+            public void onArgumentOutOfBounds() {
+                System.out.println("The 2nd argument (" + getName() + ") has not been provided. Default value false.");
+                setValue(false);
+            }
+
+            @Override
+            public void onAbnormalArgument() {
+
+            }
+
+            @Override
+            public void onIllegalArgument() {
+                System.out.println("The 2nd argument (" + getName() + ") has an illegal output argument" +
+                        " (value must be false or true). Exiting...");
+                System.exit(0);
+            }
+        };
+
+        Argument<String> outputFile = new Argument<String>("output_filename", args, 2, String.class) {
+
+            @Override
+            public void onArgumentOutOfBounds() {
+                if (output.getValue() != null && output.getValue()) {
+                    System.out.println("The 3rd argument (" + getName() + ") has not been supplied, and the 2nd" +
+                            " argument has been specified to true. Exiting...");
+                    System.exit(0);
+                }
+            }
+
+            @Override
+            public void onAbnormalArgument() {
+
+            }
+
+            @Override
+            public void onIllegalArgument() {
+                if (output.getValue() != null &&  output.getValue()) {
+                    System.out.println("The 3rd argument (" + getName() + ") has an illegal filename value." +
+                            " However, the 2nd argument has been specified to true." +
+                            " Default value for 3rd argument has been set to \"RBCCCA_stats.txt\" ");
+                    setValue("RBCCCA_stats.txt");
                 } else {
-                    System.out.println("RBCCreditCardAnalyzer requires at least one argument in order to run:"
-                            + "\n1. (Required) The path of the credit card history HTML file."
-                            + "\n2. (Optional) Boolean value of outputting the statistics. Default value: \"false\""
-                            + "\n3. (Optional) The output path for the statistics text file. Default value:" +
-                            " \"RBCCCA_stats.txt\".");
-
+                    System.out.println("The 3rd argument (" + getName() + ") has an illegal filename value" +
+                            ". Exiting...");
                     System.exit(0);
                 }
-                break;
-            case 2:
-                filePath = args[0];
-                outputStatistics = Boolean.valueOf(args[1]);
+            }
+        };
 
-                if (filePath == null || filePath.isEmpty() || filePath.equalsIgnoreCase("null")) {
-                    System.out.println("No Input File has been specified in the runtime arguments. Exiting...");
-                    System.exit(0);
-                }
-
-                break;
-            case 3:
-                filePath = args[0];
-                outputStatistics = Boolean.valueOf(args[1]);
-                outputPath = args[2];
-
-                if (filePath == null || filePath.isEmpty() || filePath.equalsIgnoreCase("null")) {
-                    System.out.println("No Input File has been specified in the runtime arguments. Exiting...");
-                    System.exit(0);
-                }
-
-                if (args[2] == null || args[2].isEmpty() || args[2].equalsIgnoreCase("null")) {
-                    System.out.println("The 3rd runtime argument (output file path) has not been provided. " +
-                            "By default, it has been assigned as \"RBCCCA_stats.txt\"");
-                }
-
-                break;
-            default:
-                System.out.println("abnormal amount of program arguments. Exiting...");
-                System.exit(0);
+        filePath = filename.getValue();
+        outputStatistics = output.getValue();
+        if (outputStatistics) {
+            outputPath = outputFile.getValue();
+        } else {
+            outputPath = null;
         }
     }
 }
