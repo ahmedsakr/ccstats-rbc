@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rbccca.input.arguments;
+package com.rbccca.input;
 
 
 /**

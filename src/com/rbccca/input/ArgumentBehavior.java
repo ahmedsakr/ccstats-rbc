@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rbccca.input.arguments;
+package com.rbccca.input;
 
 
 /**
@@ -26,6 +26,7 @@ public interface ArgumentBehavior<T> {
 
     T getValue();
     T[] getAbnormalArguments();
+
 
     /**
      * Loops over the abnormal arguments array, and checks whether the value specified in the argument
@@ -49,8 +50,6 @@ public interface ArgumentBehavior<T> {
     }
 
     void onArgumentOutOfBounds();
-
     void onAbnormalArgument();
-
     void onIllegalArgument();
 }

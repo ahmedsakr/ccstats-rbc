@@ -18,7 +18,8 @@
 package com.rbccca;
 
 
-import com.rbccca.input.arguments.Argument;
+import com.rbccca.input.Argument;
+
 
 /**
  *
@@ -117,10 +118,6 @@ public class RBCCreditCardAnalyzer {
 
         filePath = filename.getValue();
         outputStatistics = output.getValue();
-        if (outputStatistics) {
-            outputPath = outputFile.getValue();
-        } else {
-            outputPath = null;
-        }
+        outputPath = outputFile.getValue();
     }
 }
