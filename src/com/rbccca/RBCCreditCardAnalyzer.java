@@ -18,7 +18,9 @@
 package com.rbccca;
 
 
+import com.rbccca.exceptions.InvalidStatementPathException;
 import com.rbccca.input.Argument;
+import com.rbccca.input.CreditStatement;
 
 
 /**
@@ -35,7 +37,8 @@ public class RBCCreditCardAnalyzer {
      * @param args Runtime arguments provided by the user.
      */
     public static void main(String[] args) {
-        String filePath = null, outputPath = "RBCCCA_stats.txt";
+        CreditStatement statement = null;
+        String outputPath = "RBCCCA_stats.txt";
         boolean outputStatistics, userProvidedOutputPath;
 
         Argument<String> filename = new Argument<String>("filename", args, 0, String.class, "help") {
@@ -116,8 +119,12 @@ public class RBCCreditCardAnalyzer {
             }
         };
 
-        filePath = filename.getValue();
-        outputStatistics = output.getValue();
-        outputPath = outputFile.getValue();
+        try {
+            statement = new CreditStatement(filename.getValue());
+            outputStatistics = output.getValue();
+            outputPath = outputFile.getValue();
+        } catch (InvalidStatementPathException e) {
+            e.printStackTrace();
+        }
     }
 }
