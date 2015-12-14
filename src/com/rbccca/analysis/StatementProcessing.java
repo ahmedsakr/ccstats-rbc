@@ -18,6 +18,8 @@
 package com.rbccca.analysis;
 
 
+import com.rbccca.analysis.data.RBCHTMLDataExtractor;
+
 /**
  *
  * @author Ahmed Sakr
@@ -25,5 +27,9 @@ package com.rbccca.analysis;
  */
 public class StatementProcessing {
 
+    private RBCHTMLDataExtractor extractor;
 
+    public StatementProcessing(RBCHTMLDataExtractor extractor) {
+        this.extractor = extractor;
+    }
 }
