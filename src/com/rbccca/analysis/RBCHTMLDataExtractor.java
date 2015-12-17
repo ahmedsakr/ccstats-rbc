@@ -1,6 +1,7 @@
-package com.rbccca.analysis.data;
+package com.rbccca.analysis;
 
 
+import com.rbccca.analysis.data.Transaction;
 import com.rbccca.input.CreditStatement;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -138,7 +139,7 @@ public class RBCHTMLDataExtractor {
                  * In order to get the amount, the inner class that makes the text green must be
                  * accessed and its value taken.
                  */
-                amount = Double.valueOf(data.get(TRANSACTION_CREDIT_AMOUNT).child(0).html());
+                amount = Double.valueOf(data.get(TRANSACTION_CREDIT_AMOUNT).child(0).html().replace(",",""));
             }
 
             transactions.add(new Transaction(description, date, amount,

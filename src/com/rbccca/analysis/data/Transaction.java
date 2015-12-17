@@ -48,7 +48,7 @@ public class Transaction {
      * @param authorized The transaction's current status (authorized or posted)
      */
     public Transaction(String description, LocalDate date, double amount, boolean debit, boolean authorized) {
-        this.description = description;
+        this.description = description.trim();
         this.date = date;
         this.authorized = authorized;
 
@@ -94,6 +94,14 @@ public class Transaction {
      */
     public boolean isAuthorized() {
         return authorized;
+    }
+
+
+    @Override
+    public String toString() {
+        String type = isAuthorized() ? "Authorized": "Posted";
+        return String.format("[Type: %s, Description: %s, Amount: %s, Date: %s."
+                , type, getDescription(), getAmount(), getDate().toString());
     }
 
 }
