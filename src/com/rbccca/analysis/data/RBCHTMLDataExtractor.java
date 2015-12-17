@@ -1,8 +1,6 @@
 package com.rbccca.analysis.data;
 
 
-import com.rbccca.analysis.data.impl.AuthorizedTransaction;
-import com.rbccca.analysis.data.impl.PostedTransaction;
 import com.rbccca.input.CreditStatement;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -24,8 +22,7 @@ import java.util.ArrayList;
 public class RBCHTMLDataExtractor {
 
     private CreditStatement statement;
-    private ArrayList<AuthorizedTransaction> authorized;
-    private ArrayList<PostedTransaction> posted;
+    private ArrayList<Transaction> authorized, posted, transactions;
 
 
     /**
@@ -56,10 +53,19 @@ public class RBCHTMLDataExtractor {
 
     /**
      *
+     * @return An ArrayList of All transactions. (authorized and posted)
+     */
+    public ArrayList<Transaction> getTransactions() {
+        return transactions;
+    }
+
+
+    /**
+     *
      * @return An ArrayList of all the authorized transactions, each represented as a
      *         AuthorizedTransaction object.
      */
-    public ArrayList<AuthorizedTransaction> getAuthorizedTransactions() {
+    public ArrayList<Transaction> getAuthorizedTransactions() {
         return authorized;
     }
 
@@ -69,7 +75,7 @@ public class RBCHTMLDataExtractor {
      * @return An ArrayList of all the posted transactions, each represented as a
      *         PostedTransaction object.
      */
-    public ArrayList<PostedTransaction> getPostedTransactions() {
+    public ArrayList<Transaction> getPostedTransactions() {
         return posted;
     }
 
@@ -85,21 +91,26 @@ public class RBCHTMLDataExtractor {
         Element authorized = tables.get(AUTHORIZED_TRANSACTIONS);
         Element posted = tables.get(POSTED_TRANSACTIONS);
 
-        this.authorized = extractAuthorizedTransactions(authorized);
-        this.posted = extractPostedTransactions(posted);
+        this.authorized = extractTransactions(authorized, "authorized");
+        this.posted = extractTransactions(posted, "posted");
+
+        this.transactions = this.authorized;
+        this.transactions.addAll(this.posted);
+        this.transactions = sortByDate(this.transactions);
+
     }
 
 
     /**
      * Extracts all the authorized transactions, provided the authorized transactions table as a parameter.
      *
-     * @param transactions The Authorized transactions Element
+     * @param table The Authorized transactions table Element
      *
-     * @return ArrayList of the AuthorizedTransactions.
+     * @return ArrayList of the Transactions.
      */
-    private ArrayList<AuthorizedTransaction> extractAuthorizedTransactions(Element transactions) {
-        ArrayList<AuthorizedTransaction> authorizedTransactions = new ArrayList<>();
-        Elements rows = transactions.getElementsByTag("tr");
+    private ArrayList<Transaction> extractTransactions(Element table, String type) {
+        ArrayList<Transaction> transactions = new ArrayList<>();
+        Elements rows = table.getElementsByTag("tr");
         rows.remove(0); // this row is just for the headers of the table (description, pending debit, pending credit)
 
         for (Element transaction : rows) {
@@ -130,52 +141,35 @@ public class RBCHTMLDataExtractor {
                 amount = Double.valueOf(data.get(TRANSACTION_CREDIT_AMOUNT).child(0).html());
             }
 
-            authorizedTransactions.add(new AuthorizedTransaction(description, date, amount,
+            transactions.add(new Transaction(description, date, amount,
                     data.get(TRANSACTION_DEBIT_AMOUNT).children().size() == 0
-                            && !data.get(TRANSACTION_DEBIT_AMOUNT).html().isEmpty()));
+                            && !data.get(TRANSACTION_DEBIT_AMOUNT).html().isEmpty(), type.equals("authorized")));
         }
 
-        return authorizedTransactions;
+        return transactions;
     }
 
-    private ArrayList<PostedTransaction> extractPostedTransactions(Element transactions) {
-        ArrayList<PostedTransaction> postedTransactions = new ArrayList<>();
-        Elements rows = transactions.getElementsByTag("tr");
-        rows.remove(0); // this row is just for the headers of the table (description, pending debit, pending credit)
 
-        for (Element transaction : rows) {
-            Elements data = transaction.getElementsByTag("td");
+    /**
+     * Sorts the transactions by date (reverse chronological order).
+     *
+     * @param transactions The 'unsorted' transactions.
+     *
+     * @return The sorted transactions
+     */
+    private ArrayList<Transaction> sortByDate(ArrayList<Transaction> transactions) {
+        ArrayList<Transaction> sorted = new ArrayList<>();
 
-            // all dates provided in the statement are in the format MMM dd, yyy (i.e Dec 14, 2015)
-            DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy");
-            LocalDate date = LocalDate.parse(data.get(TRANSACTION_DATE).html(), format);
-            String description = data.get(TRANSACTION_DESCRIPTION).html().replace("<br>", "");
-            double amount;
+        for (Transaction transaction : transactions) {
+            int i = 0;
 
-            /**
-             * The whole if-else block is mainly testing whether the current transaction of the iteration is
-             * a credit or a debit  transaction. If the debit amount column has no children (hence only the value),
-             * and it is not empty then it must be a debit transaction. Otherwise, the only other option is a
-             * credit transaction.
-             */
-            if (data.get(TRANSACTION_DEBIT_AMOUNT).children().size() == 0
-                    && !data.get(TRANSACTION_DEBIT_AMOUNT).html().isEmpty()) {
-                amount = Double.valueOf(data.get(TRANSACTION_DEBIT_AMOUNT).html());
-            } else {
-
-                /**
-                 * The amounts of credit are displayed in green, hence symbolizing a grant.
-                 * In order to get the amount, the inner class that makes the text green must be
-                 * accessed and its value taken.
-                 */
-                amount = Double.valueOf(data.get(TRANSACTION_CREDIT_AMOUNT).child(0).html());
+            while (i < sorted.size() && sorted.get(i).getDate().isAfter(transaction.getDate())) {
+                i++;
             }
 
-            postedTransactions.add(new PostedTransaction(description, date, amount,
-                    data.get(TRANSACTION_DEBIT_AMOUNT).children().size() == 0
-                            && !data.get(TRANSACTION_DEBIT_AMOUNT).html().isEmpty()));
+            sorted.add(i, transaction);
         }
 
-        return postedTransactions;
+        return sorted;
     }
 }

@@ -25,11 +25,12 @@ import java.time.LocalDate;
  * @author Ahmed Sakr
  * @since December 12, 2015.
  */
-public abstract class Transaction {
+public class Transaction {
 
     private String description;
     private LocalDate date;
     private double amount;
+    private boolean authorized;
 
 
     /**
@@ -44,10 +45,12 @@ public abstract class Transaction {
      * @param date The date the transaction has been recorded.
      * @param amount The amount due from the transaction.
      * @param debit The type of the transaction (Debit/Credit)
+     * @param authorized The transaction's current status (authorized or posted)
      */
-    public Transaction(String description, LocalDate date, double amount, boolean debit) {
+    public Transaction(String description, LocalDate date, double amount, boolean debit, boolean authorized) {
         this.description = description;
         this.date = date;
+        this.authorized = authorized;
 
         if (debit) {
             this.amount = amount;
@@ -89,6 +92,8 @@ public abstract class Transaction {
      *
      * @return The status of the transaction.
      */
-    public abstract boolean isPosted();
+    public boolean isAuthorized() {
+        return authorized;
+    }
 
 }

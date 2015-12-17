@@ -18,6 +18,7 @@
 package com.rbccca;
 
 
+import com.rbccca.analysis.StatementProcessing;
 import com.rbccca.exceptions.InvalidStatementPathException;
 import com.rbccca.input.Argument;
 import com.rbccca.input.CreditStatement;
@@ -39,13 +40,12 @@ public class RBCCreditCardAnalyzer {
     public static void main(String[] args) {
         CreditStatement statement = null;
         String outputPath = "RBCCCA_stats.txt";
-        boolean outputStatistics, userProvidedOutputPath;
 
         Argument<String> filename = new Argument<String>("filename", args, 0, String.class, "help") {
 
             @Override
             public void onArgumentOutOfBounds() {
-                System.out.println("The 1st argument (" + getName() + ") has not been provided. Exiting...");
+                System.out.printf("The 1st argument (%s) has not been provided. Exiting...\n", getName());
                 System.exit(0);
             }
 
@@ -53,8 +53,7 @@ public class RBCCreditCardAnalyzer {
             public void onAbnormalArgument() {
                 System.out.println("RBCCreditCardAnalyzer requires at least one argument in order to run:"
                         + "\n1. (Required) The path of the credit card history HTML file."
-                        + "\n2. (Optional) Boolean value of outputting the statistics. Default value: \"false\""
-                        + "\n3. (Optional) The output path for the statistics text file. Default value:" +
+                        + "\n2. (Optional) The output path for the statistics text file. Default value:" +
                         " \"RBCCCA_stats.txt\".");
 
                 System.exit(0);
@@ -62,28 +61,7 @@ public class RBCCreditCardAnalyzer {
 
             @Override
             public void onIllegalArgument() {
-                System.out.println("The 1st argument (" + getName() + ") is an illegal filename argument. Exiting...");
-                System.exit(0);
-            }
-        };
-
-        Argument<Boolean> output = new Argument<Boolean>("should_output", args, 1, Boolean.class) {
-
-            @Override
-            public void onArgumentOutOfBounds() {
-                System.out.println("The 2nd argument (" + getName() + ") has not been provided. Default value false.");
-                setValue(false);
-            }
-
-            @Override
-            public void onAbnormalArgument() {
-
-            }
-
-            @Override
-            public void onIllegalArgument() {
-                System.out.println("The 2nd argument (" + getName() + ") has an illegal output argument" +
-                        " (value must be false or true). Exiting...");
+                System.out.printf("The 1st argument (%s) is an illegal filename argument. Exiting...\n", getName());
                 System.exit(0);
             }
         };
@@ -92,11 +70,8 @@ public class RBCCreditCardAnalyzer {
 
             @Override
             public void onArgumentOutOfBounds() {
-                if (output.getValue() != null && output.getValue()) {
-                    System.out.println("The 3rd argument (" + getName() + ") has not been supplied, and the 2nd" +
-                            " argument has been specified to true. Exiting...");
-                    System.exit(0);
-                }
+                System.out.printf("The 2nd argument (%s) has not been supplied, default value 'RBCCCA_stats.txt'"
+                        , getName());
             }
 
             @Override
@@ -106,23 +81,16 @@ public class RBCCreditCardAnalyzer {
 
             @Override
             public void onIllegalArgument() {
-                if (output.getValue() != null &&  output.getValue()) {
-                    System.out.println("The 3rd argument (" + getName() + ") has an illegal filename value." +
-                            " However, the 2nd argument has been specified to true." +
-                            " Default value for 3rd argument has been set to \"RBCCCA_stats.txt\" ");
-                    setValue("RBCCCA_stats.txt");
-                } else {
-                    System.out.println("The 3rd argument (" + getName() + ") has an illegal filename value" +
-                            ". Exiting...");
-                    System.exit(0);
-                }
+                System.out.printf("The 2rd argument (%s) has an illegal filename value." +
+                        " Defaulting to 'RBCCCA_stats.txt'\n", getName());
             }
         };
 
         try {
             statement = new CreditStatement(filename.getValue());
-            outputStatistics = output.getValue();
             outputPath = outputFile.getValue();
+
+            StatementProcessing analysis = new StatementProcessing(statement);
         } catch (InvalidStatementPathException e) {
             e.printStackTrace();
         }
