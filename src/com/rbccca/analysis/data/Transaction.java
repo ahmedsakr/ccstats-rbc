@@ -99,9 +99,9 @@ public class Transaction {
 
     @Override
     public String toString() {
-        String type = isAuthorized() ? "Authorized": "Posted";
-        return String.format("[Type: %s, Description: %s, Amount: %s, Date: %s.]"
-                , type, getDescription(), getAmount(), getDate().toString());
+        String status = isAuthorized() ? "Authorized": "Posted";
+        return String.format("[Status: %s, Description: %s, Amount: %s, Date: %s.]"
+                , status, getDescription(), getAmount(), getDate().toString());
     }
 
 }

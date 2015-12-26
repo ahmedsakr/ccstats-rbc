@@ -52,7 +52,7 @@ public class Statement extends Statistics {
     /**
      * @return The Statistics object of the authorized transactions.
      */
-    public Statistics getAuthorized() {
+    public Statistics getAuthorizedTransactions() {
         return authorized;
     }
 
@@ -60,7 +60,7 @@ public class Statement extends Statistics {
     /**
      * @return The Statistics object of the posted transactions.
      */
-    public Statistics getPostedSize() {
+    public Statistics getPostedTransactions() {
         return posted;
     }
 }

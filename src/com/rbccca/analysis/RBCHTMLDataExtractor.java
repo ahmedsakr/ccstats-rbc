@@ -95,7 +95,8 @@ public class RBCHTMLDataExtractor {
         this.authorized = extractTransactions(authorized, "authorized");
         this.posted = extractTransactions(posted, "posted");
 
-        this.transactions = this.authorized;
+        this.transactions = new ArrayList<>();
+        this.transactions.addAll(this.authorized);
         this.transactions.addAll(this.posted);
         this.transactions = sortByDate(this.transactions);
 
