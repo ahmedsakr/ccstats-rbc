@@ -30,6 +30,45 @@ public class Statistics {
         return transactions;
     }
 
+
+
+    /**
+     * Acquires all transactions that are of type debit. A Debit transaction is usually a payment
+     * induced by the customer to pay off previous credit transactions.
+     *
+     * @return The Statistics of the debit transactions.
+     */
+    public Statistics getDebitTransactions() {
+        ArrayList<Transaction> transactions = new ArrayList<>();
+
+        for (Transaction transaction : this.transactions) {
+            if (transaction.getAmount() < 0) {
+                transactions.add(transaction);
+            }
+        }
+
+        return new Statistics(transactions);
+    }
+
+    /**
+     * Acquires all transactions that are of type credit. A Credit transaction is usually a credit
+     * usage of the credit card.
+     *
+     * @return The Statistics of the credit transactions.
+     */
+    public Statistics getCreditTransactions() {
+        ArrayList<Transaction> transactions = new ArrayList<>();
+
+        for (Transaction transaction : this.transactions) {
+            if (transaction.getAmount() >= 0) {
+                transactions.add(transaction);
+            }
+        }
+
+        return new Statistics(transactions);
+    }
+
+
     /**
      * Calculates the total amount due from all the posted and authorized transactions.
      *
@@ -77,21 +116,44 @@ public class Statistics {
      *
      * @param date1 The beginning date.
      * @param date2 The (exclusive) ending date.
-     * @return All transactions between the dates.
+     * @return The Statistics object of all transactions between the required dates.
      */
-    public ArrayList<Transaction> getTransactionsFrom(String date1, String date2) {
+    public Statistics getTransactionsFrom(String date1, String date2) {
         LocalDate date3 = LocalDate.parse(date1, DateTimeFormatter.ofPattern("MMM dd, yyyy"));
         LocalDate date4 = LocalDate.parse(date2, DateTimeFormatter.ofPattern("MMM dd, yyyy"));
         ArrayList<Transaction> transactions = new ArrayList<>();
 
         for (Transaction transaction : this.transactions) {
             LocalDate date = transaction.getDate();
+
             if (isAfterOrEqual(date, date3) && isBeforeOrEqual(date, date4)) {
                 transactions.add(transaction);
             }
         }
 
-        return transactions;
+        return new Statistics(transactions);
+    }
+
+
+    /**
+     * Acquires all transactions between the minimum and maximum amount range.
+     *
+     * @param leastAmount The minimum amount a transaction must be to be collected.
+     * @param highestAmount The maximum amount a transaction must be to be collected.
+     *
+     * @return The Statistics object of the transactions list.
+     */
+    public Statistics getTransactionsFrom(double leastAmount, double highestAmount) {
+        ArrayList<Transaction> transactions = new ArrayList<>();
+        for (Transaction transaction : this.transactions) {
+            double amount = transaction.getAmount();
+
+            if (amount >= leastAmount && amount <= highestAmount) {
+                transactions.add(transaction);
+            }
+        }
+
+        return new Statistics(transactions);
     }
 
 
@@ -105,16 +167,17 @@ public class Statistics {
         LocalDate earliest = transactions.get(0).getDate(), latest = transactions.get(0).getDate();
 
         for (Transaction transaction : this.transactions) {
-            if (transaction.getDate().isBefore(earliest)) {
+            LocalDate date = transaction.getDate();
+
+            if (date.isBefore(earliest)) {
                 earliest = transaction.getDate();
             }
 
-            if (transaction.getDate().isAfter(latest)) {
+            if (date.isAfter(latest)) {
                 latest = transaction.getDate();
             }
         }
 
-        System.out.printf("Earliest: %s, Latest: %s", earliest.toString(), latest.toString());
 
         return ChronoUnit.DAYS.between(earliest, latest) + 1;
     }
@@ -144,10 +207,70 @@ public class Statistics {
      * @return The average amount spent between date1 and date2.
      */
     public double getAverageFrom(String date1, String date2) {
-        Statistics stats = new Statistics(getTransactionsFrom(date1, date2));
+        Statistics stats = getTransactionsFrom(date1, date2);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
         long days = ChronoUnit.DAYS.between(LocalDate.parse(date1, formatter), LocalDate.parse(date2, formatter));
 
         return stats.getTotalDue() / (days + 1);
+    }
+
+
+    /**
+     * Acquires all transactions that revolving around a keyword.
+     * If startWith is true, all transactions that startWith the keyword are acquired.
+     * However, if startWith is false then only the transactions that are equal (not case sensitive)
+     * to the keyword are acquired.
+     *
+     * @param keyword The keyword used to select transactions
+     * @param startWith whether the transaction's description should be equal or startWith the keyword.
+     *
+     * @return The Statistics object of the transactions.
+     */
+    public Statistics getTransactionsByDescription(String keyword, boolean startWith) {
+        ArrayList<Transaction> transactions = new ArrayList<>();
+        for (Transaction transaction : this.transactions) {
+            if (transaction.getDescription().equalsIgnoreCase(keyword)
+                    || (startWith && transaction.getDescription().startsWith(keyword))) {
+                transactions.add(transaction);
+            }
+        }
+
+        return new Statistics(transactions);
+    }
+
+
+    /**
+     * Acquires the most expensive transaction in the list.
+     *
+     * @return The Transaction object.
+     */
+    public Transaction getMostExpensive() {
+        Transaction mostExpensive = transactions.get(0);
+
+        for (Transaction transaction : this.transactions) {
+            if (transaction.getAmount() >= mostExpensive.getAmount()) {
+                mostExpensive = transaction;
+            }
+        }
+
+        return mostExpensive;
+    }
+
+
+    /**
+     * Acquires the least expensive transaction in the list.
+     *
+     * @return The Transaction object.
+     */
+    public Transaction getLeastExpensive() {
+        Transaction leastExpensive = transactions.get(0);
+
+        for (Transaction transaction : this.transactions) {
+            if (transaction.getAmount() <= leastExpensive.getAmount()) {
+                leastExpensive = transaction;
+            }
+        }
+
+        return leastExpensive;
     }
 }
