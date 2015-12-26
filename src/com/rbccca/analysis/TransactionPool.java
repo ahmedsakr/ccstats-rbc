@@ -42,15 +42,15 @@ public class TransactionPool extends ArrayList<Transaction> {
      * @return The TransactionPool of the debit transactions.
      */
     public TransactionPool getDebitTransactions() {
-        ArrayList<Transaction> transactions = new ArrayList<>();
+        TransactionPool pool = new TransactionPool();
 
         for (Transaction transaction : this) {
             if (transaction.getAmount() < 0) {
-                transactions.add(transaction);
+                pool.add(transaction);
             }
         }
 
-        return new TransactionPool(transactions);
+        return pool;
     }
 
     /**
