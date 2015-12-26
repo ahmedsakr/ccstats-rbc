@@ -19,7 +19,7 @@ package com.rbccca.analysis.data;
 
 
 import com.rbccca.analysis.RBCHTMLDataExtractor;
-import com.rbccca.analysis.Statistics;
+import com.rbccca.analysis.TransactionPool;
 
 
 /**
@@ -27,11 +27,10 @@ import com.rbccca.analysis.Statistics;
  * @author Ahmed Sakr
  * @since November 28, 2015.
  */
-public class Statement extends Statistics {
+public class Statement extends TransactionPool {
 
 
-    private RBCHTMLDataExtractor extractor;
-    private Statistics authorized, posted;
+    private TransactionPool authorized, posted;
 
 
     /**
@@ -43,24 +42,23 @@ public class Statement extends Statistics {
     public Statement(RBCHTMLDataExtractor extractor) {
         super(extractor.getTransactions());
 
-        this.extractor = extractor;
-        this.authorized = new Statistics(extractor.getAuthorizedTransactions());
-        this.posted = new Statistics(extractor.getPostedTransactions());
+        this.authorized = new TransactionPool(extractor.getAuthorizedTransactions());
+        this.posted = new TransactionPool(extractor.getPostedTransactions());
     }
 
 
     /**
-     * @return The Statistics object of the authorized transactions.
+     * @return The TransactionPool object of the authorized transactions.
      */
-    public Statistics getAuthorizedTransactions() {
+    public TransactionPool getAuthorizedTransactions() {
         return authorized;
     }
 
 
     /**
-     * @return The Statistics object of the posted transactions.
+     * @return The TransactionPool object of the posted transactions.
      */
-    public Statistics getPostedTransactions() {
+    public TransactionPool getPostedTransactions() {
         return posted;
     }
 }

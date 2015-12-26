@@ -14,58 +14,61 @@ import java.util.ArrayList;
  * @author Ahmed Sakr
  * @since December 17, 2015.
  */
-public class Statistics {
+public class TransactionPool extends ArrayList<Transaction> {
 
-    private ArrayList<Transaction> transactions;
 
-    public Statistics(ArrayList<Transaction> transactions) {
-        this.transactions = transactions;
+    /**
+     * Default constructor. Allows for no parameter construction of the class.
+     */
+    public TransactionPool() {
+
     }
 
 
     /**
-     * @return All the transactions held in this statistics class.
+     * Constructs a new TransactionPool object, and transfers all elements in the ArrayList to the object.
+     *
+     * @param transactions The ArrayList with elements to be appended to the object.
      */
-    public ArrayList<Transaction> getTransactions() {
-        return transactions;
+    public TransactionPool(ArrayList<Transaction> transactions) {
+        super(transactions);
     }
-
 
 
     /**
      * Acquires all transactions that are of type debit. A Debit transaction is usually a payment
      * induced by the customer to pay off previous credit transactions.
      *
-     * @return The Statistics of the debit transactions.
+     * @return The TransactionPool of the debit transactions.
      */
-    public Statistics getDebitTransactions() {
+    public TransactionPool getDebitTransactions() {
         ArrayList<Transaction> transactions = new ArrayList<>();
 
-        for (Transaction transaction : this.transactions) {
+        for (Transaction transaction : this) {
             if (transaction.getAmount() < 0) {
                 transactions.add(transaction);
             }
         }
 
-        return new Statistics(transactions);
+        return new TransactionPool(transactions);
     }
 
     /**
      * Acquires all transactions that are of type credit. A Credit transaction is usually a credit
      * usage of the credit card.
      *
-     * @return The Statistics of the credit transactions.
+     * @return The TransactionPool of the credit transactions.
      */
-    public Statistics getCreditTransactions() {
-        ArrayList<Transaction> transactions = new ArrayList<>();
+    public TransactionPool getCreditTransactions() {
+        TransactionPool pool = new TransactionPool();
 
-        for (Transaction transaction : this.transactions) {
+        for (Transaction transaction : this) {
             if (transaction.getAmount() >= 0) {
-                transactions.add(transaction);
+                pool.add(transaction);
             }
         }
 
-        return new Statistics(transactions);
+        return pool;
     }
 
 
@@ -77,7 +80,7 @@ public class Statistics {
     public double getTotalDue() {
         double due = 0;
 
-        for (Transaction transaction : this.transactions) {
+        for (Transaction transaction : this) {
             due += transaction.getAmount();
         }
 
@@ -116,22 +119,22 @@ public class Statistics {
      *
      * @param date1 The beginning date.
      * @param date2 The (exclusive) ending date.
-     * @return The Statistics object of all transactions between the required dates.
+     * @return The TransactionPool object of all transactions between the required dates.
      */
-    public Statistics getTransactionsFrom(String date1, String date2) {
+    public TransactionPool getTransactionsFrom(String date1, String date2) {
         LocalDate date3 = LocalDate.parse(date1, DateTimeFormatter.ofPattern("MMM dd, yyyy"));
         LocalDate date4 = LocalDate.parse(date2, DateTimeFormatter.ofPattern("MMM dd, yyyy"));
-        ArrayList<Transaction> transactions = new ArrayList<>();
+        TransactionPool pool = new TransactionPool();
 
-        for (Transaction transaction : this.transactions) {
+        for (Transaction transaction : this) {
             LocalDate date = transaction.getDate();
 
             if (isAfterOrEqual(date, date3) && isBeforeOrEqual(date, date4)) {
-                transactions.add(transaction);
+                pool.add(transaction);
             }
         }
 
-        return new Statistics(transactions);
+        return pool;
     }
 
 
@@ -141,19 +144,19 @@ public class Statistics {
      * @param leastAmount The minimum amount a transaction must be to be collected.
      * @param highestAmount The maximum amount a transaction must be to be collected.
      *
-     * @return The Statistics object of the transactions list.
+     * @return The TransactionPool object of the transactions list.
      */
-    public Statistics getTransactionsFrom(double leastAmount, double highestAmount) {
-        ArrayList<Transaction> transactions = new ArrayList<>();
-        for (Transaction transaction : this.transactions) {
+    public TransactionPool getTransactionsFrom(double leastAmount, double highestAmount) {
+        TransactionPool pool = new TransactionPool();
+        for (Transaction transaction : this) {
             double amount = transaction.getAmount();
 
             if (amount >= leastAmount && amount <= highestAmount) {
-                transactions.add(transaction);
+                pool.add(transaction);
             }
         }
 
-        return new Statistics(transactions);
+        return pool;
     }
 
 
@@ -164,9 +167,9 @@ public class Statistics {
      * is why + 1 has been added to the return statement.
      */
     public long getDateRange() {
-        LocalDate earliest = transactions.get(0).getDate(), latest = transactions.get(0).getDate();
+        LocalDate earliest = this.get(0).getDate(), latest = this.get(0).getDate();
 
-        for (Transaction transaction : this.transactions) {
+        for (Transaction transaction : this) {
             LocalDate date = transaction.getDate();
 
             if (date.isBefore(earliest)) {
@@ -207,11 +210,11 @@ public class Statistics {
      * @return The average amount spent between date1 and date2.
      */
     public double getAverageFrom(String date1, String date2) {
-        Statistics stats = getTransactionsFrom(date1, date2);
+        TransactionPool pool = getTransactionsFrom(date1, date2);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
         long days = ChronoUnit.DAYS.between(LocalDate.parse(date1, formatter), LocalDate.parse(date2, formatter));
 
-        return stats.getTotalDue() / (days + 1);
+        return pool.getTotalDue() / (days + 1);
     }
 
 
@@ -224,18 +227,18 @@ public class Statistics {
      * @param keyword The keyword used to select transactions
      * @param startWith whether the transaction's description should be equal or startWith the keyword.
      *
-     * @return The Statistics object of the transactions.
+     * @return The TransactionPool object of the transactions.
      */
-    public Statistics getTransactionsByDescription(String keyword, boolean startWith) {
-        ArrayList<Transaction> transactions = new ArrayList<>();
-        for (Transaction transaction : this.transactions) {
+    public TransactionPool getTransactionsByDescription(String keyword, boolean startWith) {
+        TransactionPool pool = new TransactionPool();
+        for (Transaction transaction : this) {
             if (transaction.getDescription().equalsIgnoreCase(keyword)
                     || (startWith && transaction.getDescription().startsWith(keyword))) {
-                transactions.add(transaction);
+                pool.add(transaction);
             }
         }
 
-        return new Statistics(transactions);
+        return pool;
     }
 
 
@@ -245,9 +248,9 @@ public class Statistics {
      * @return The Transaction object.
      */
     public Transaction getMostExpensive() {
-        Transaction mostExpensive = transactions.get(0);
+        Transaction mostExpensive = this.get(0);
 
-        for (Transaction transaction : this.transactions) {
+        for (Transaction transaction : this) {
             if (transaction.getAmount() >= mostExpensive.getAmount()) {
                 mostExpensive = transaction;
             }
@@ -263,9 +266,9 @@ public class Statistics {
      * @return The Transaction object.
      */
     public Transaction getLeastExpensive() {
-        Transaction leastExpensive = transactions.get(0);
+        Transaction leastExpensive = this.get(0);
 
-        for (Transaction transaction : this.transactions) {
+        for (Transaction transaction : this) {
             if (transaction.getAmount() <= leastExpensive.getAmount()) {
                 leastExpensive = transaction;
             }

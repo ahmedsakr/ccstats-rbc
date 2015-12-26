@@ -100,8 +100,10 @@ public class Transaction {
     @Override
     public String toString() {
         String status = isAuthorized() ? "Authorized": "Posted";
-        return String.format("[Status: %s, Description: %s, Amount: %s, Date: %s.]"
-                , status, getDescription(), getAmount(), getDate().toString());
+        String type = getAmount() >= 0 ? "Credit": "Debit";
+
+        return String.format("[Status: %s, Type: %s, Description: %s, Amount: %s, Date: %s.]"
+                , status, type, getDescription(), Math.abs(getAmount()), getDate().toString());
     }
 
 }

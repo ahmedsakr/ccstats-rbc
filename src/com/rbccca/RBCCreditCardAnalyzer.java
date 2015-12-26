@@ -18,7 +18,6 @@
 package com.rbccca;
 
 
-import com.rbccca.analysis.Statistics;
 import com.rbccca.analysis.data.Statement;
 import com.rbccca.analysis.RBCHTMLDataExtractor;
 import com.rbccca.exceptions.InvalidStatementPathException;
