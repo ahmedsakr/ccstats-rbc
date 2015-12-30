@@ -18,8 +18,8 @@
 package com.rbccca.analysis.data;
 
 
-import com.rbccca.analysis.RBCHTMLDataExtractor;
-import com.rbccca.analysis.TransactionPool;
+import com.rbccca.analysis.TransactionsExtractor;
+import com.rbccca.analysis.TransactionsPool;
 
 
 /**
@@ -27,10 +27,10 @@ import com.rbccca.analysis.TransactionPool;
  * @author Ahmed Sakr
  * @since November 28, 2015.
  */
-public class Statement extends TransactionPool {
+public class Statement extends TransactionsPool {
 
 
-    private TransactionPool authorized, posted;
+    private TransactionsPool authorized, posted;
 
 
     /**
@@ -39,26 +39,26 @@ public class Statement extends TransactionPool {
      *
      * @param extractor The Transactions extractor.
      */
-    public Statement(RBCHTMLDataExtractor extractor) {
+    public Statement(TransactionsExtractor extractor) {
         super(extractor.getTransactions());
 
-        this.authorized = new TransactionPool(extractor.getAuthorizedTransactions());
-        this.posted = new TransactionPool(extractor.getPostedTransactions());
+        this.authorized = new TransactionsPool(extractor.getAuthorizedTransactions());
+        this.posted = new TransactionsPool(extractor.getPostedTransactions());
     }
 
 
     /**
-     * @return The TransactionPool object of the authorized transactions.
+     * @return The TransactionsPool object of the authorized transactions.
      */
-    public TransactionPool getAuthorizedTransactions() {
+    public TransactionsPool getAuthorizedTransactions() {
         return authorized;
     }
 
 
     /**
-     * @return The TransactionPool object of the posted transactions.
+     * @return The TransactionsPool object of the posted transactions.
      */
-    public TransactionPool getPostedTransactions() {
+    public TransactionsPool getPostedTransactions() {
         return posted;
     }
 }

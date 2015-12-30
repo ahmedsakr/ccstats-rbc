@@ -14,23 +14,23 @@ import java.util.ArrayList;
  * @author Ahmed Sakr
  * @since December 17, 2015.
  */
-public class TransactionPool extends ArrayList<Transaction> {
+public class TransactionsPool extends ArrayList<Transaction> {
 
 
     /**
      * Default constructor. Allows for no parameter construction of the class.
      */
-    public TransactionPool() {
+    public TransactionsPool() {
 
     }
 
 
     /**
-     * Constructs a new TransactionPool object, and transfers all elements in the ArrayList to the object.
+     * Constructs a new TransactionsPool object, and transfers all elements in the ArrayList to the object.
      *
      * @param transactions The ArrayList with elements to be appended to the object.
      */
-    public TransactionPool(ArrayList<Transaction> transactions) {
+    public TransactionsPool(ArrayList<Transaction> transactions) {
         super(transactions);
     }
 
@@ -39,10 +39,10 @@ public class TransactionPool extends ArrayList<Transaction> {
      * Acquires all transactions that are of type debit. A Debit transaction is usually a payment
      * induced by the customer to pay off previous credit transactions.
      *
-     * @return The TransactionPool of the debit transactions.
+     * @return The TransactionsPool of the debit transactions.
      */
-    public TransactionPool getDebitTransactions() {
-        TransactionPool pool = new TransactionPool();
+    public TransactionsPool getDebitTransactions() {
+        TransactionsPool pool = new TransactionsPool();
 
         for (Transaction transaction : this) {
             if (transaction.getAmount() < 0) {
@@ -57,10 +57,10 @@ public class TransactionPool extends ArrayList<Transaction> {
      * Acquires all transactions that are of type credit. A Credit transaction is usually a credit
      * usage of the credit card.
      *
-     * @return The TransactionPool of the credit transactions.
+     * @return The TransactionsPool of the credit transactions.
      */
-    public TransactionPool getCreditTransactions() {
-        TransactionPool pool = new TransactionPool();
+    public TransactionsPool getCreditTransactions() {
+        TransactionsPool pool = new TransactionsPool();
 
         for (Transaction transaction : this) {
             if (transaction.getAmount() >= 0) {
@@ -119,12 +119,12 @@ public class TransactionPool extends ArrayList<Transaction> {
      *
      * @param date1 The beginning date.
      * @param date2 The (exclusive) ending date.
-     * @return The TransactionPool object of all transactions between the required dates.
+     * @return The TransactionsPool object of all transactions between the required dates.
      */
-    public TransactionPool getTransactionsFrom(String date1, String date2) {
+    public TransactionsPool getTransactionsFrom(String date1, String date2) {
         LocalDate date3 = LocalDate.parse(date1, DateTimeFormatter.ofPattern("MMM dd, yyyy"));
         LocalDate date4 = LocalDate.parse(date2, DateTimeFormatter.ofPattern("MMM dd, yyyy"));
-        TransactionPool pool = new TransactionPool();
+        TransactionsPool pool = new TransactionsPool();
 
         for (Transaction transaction : this) {
             LocalDate date = transaction.getDate();
@@ -144,10 +144,10 @@ public class TransactionPool extends ArrayList<Transaction> {
      * @param leastAmount The minimum amount a transaction must be to be collected.
      * @param highestAmount The maximum amount a transaction must be to be collected.
      *
-     * @return The TransactionPool object of the transactions list.
+     * @return The TransactionsPool object of the transactions list.
      */
-    public TransactionPool getTransactionsFrom(double leastAmount, double highestAmount) {
-        TransactionPool pool = new TransactionPool();
+    public TransactionsPool getTransactionsFrom(double leastAmount, double highestAmount) {
+        TransactionsPool pool = new TransactionsPool();
         for (Transaction transaction : this) {
             double amount = transaction.getAmount();
 
@@ -210,7 +210,7 @@ public class TransactionPool extends ArrayList<Transaction> {
      * @return The average amount spent between date1 and date2.
      */
     public double getAverageFrom(String date1, String date2) {
-        TransactionPool pool = getTransactionsFrom(date1, date2);
+        TransactionsPool pool = getTransactionsFrom(date1, date2);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
         long days = ChronoUnit.DAYS.between(LocalDate.parse(date1, formatter), LocalDate.parse(date2, formatter));
 
@@ -219,18 +219,19 @@ public class TransactionPool extends ArrayList<Transaction> {
 
 
     /**
-     * Acquires all transactions that revolving around a keyword.
-     * If startWith is true, all transactions that startWith the keyword are acquired.
+     * Acquires all transactions that revolve around a specified keyword.
+     *
+     * If startWith is set to true, all transactions that startWith the keyword are acquired.
      * However, if startWith is false then only the transactions that are equal (not case sensitive)
      * to the keyword are acquired.
      *
      * @param keyword The keyword used to select transactions
      * @param startWith whether the transaction's description should be equal or startWith the keyword.
      *
-     * @return The TransactionPool object of the transactions.
+     * @return The TransactionsPool object of the transactions.
      */
-    public TransactionPool getTransactionsByDescription(String keyword, boolean startWith) {
-        TransactionPool pool = new TransactionPool();
+    public TransactionsPool getTransactionsByDescription(String keyword, boolean startWith) {
+        TransactionsPool pool = new TransactionsPool();
         for (Transaction transaction : this) {
             if (transaction.getDescription().equalsIgnoreCase(keyword)
                     || (startWith && transaction.getDescription().startsWith(keyword))) {

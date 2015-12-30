@@ -20,9 +20,8 @@ import java.util.ArrayList;
  * @author Ahmed Sakr
  * @since December 14, 2015
  */
-public class RBCHTMLDataExtractor {
+public class TransactionsExtractor {
 
-    private CreditStatement statement;
     private ArrayList<Transaction> authorized, posted, transactions;
 
 
@@ -31,21 +30,18 @@ public class RBCHTMLDataExtractor {
      * to avoid magic numbers that might cause confusion.
      */
     private static final int AUTHORIZED_TRANSACTIONS = 2, POSTED_TRANSACTIONS = 3;
-    private static final int TRANSACTION_DATE = 0, TRANSACTION_DESCRIPTION = 1, TRANSACTION_DEBIT_AMOUNT = 2
-                                , TRANSACTION_CREDIT_AMOUNT = 3;
+    private static final int TRANSACTION_DATE = 0, TRANSACTION_DESCRIPTION = 1, TRANSACTION_DEBIT_AMOUNT = 2, TRANSACTION_CREDIT_AMOUNT = 3;
 
 
     /**
-     * Constructor for the RBCHTMLDataExtractor that requires the statement as a parameter.
+     * Constructor for the TransactionsExtractor that requires the statement as a parameter.
      * Immediately begins extracting all needed data from the statement.
      *
      * @param statement The CreditStatement instance provided by the user.
      */
-    public RBCHTMLDataExtractor(CreditStatement statement) {
-        this.statement = statement;
-
+    public TransactionsExtractor(CreditStatement statement) {
         try {
-            extractTransactions();
+            extractTransactions(Jsoup.parse(new File(statement.getAbsolutePath()), "UTF-8"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,7 +49,52 @@ public class RBCHTMLDataExtractor {
 
 
     /**
+     * Constructor for the TransactionsExtractor that requires both the statement file and
+     * the baseUri as parameters.
      *
+     * @param statement The CreditStatement Object.
+     * @param baseUri   The Text Encoding.
+     */
+    public TransactionsExtractor(CreditStatement statement, String baseUri) {
+        try {
+            extractTransactions(Jsoup.parse(new File(statement.getAbsolutePath()), baseUri));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Constructor for the TransactionsExtractor. Requires the html text of the document as a parameter.
+     *
+     * @param html The HTML text as a String object.
+     */
+    public TransactionsExtractor(String html) {
+        try {
+            extractTransactions(Jsoup.parse(html, "UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Constructor for the TransactionsExtractor. Requires both the HTML text of the document and
+     * the baseUri in which the text is encoded in.
+     *
+     * @param html    The HTML text of the document as a String object
+     * @param baseUri The Text Encoding.
+     */
+    public TransactionsExtractor(String html, String baseUri) {
+        try {
+            extractTransactions(Jsoup.parse(html, baseUri));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
      * @return An ArrayList of All transactions. (authorized and posted)
      */
     public ArrayList<Transaction> getTransactions() {
@@ -62,9 +103,8 @@ public class RBCHTMLDataExtractor {
 
 
     /**
-     *
      * @return An ArrayList of all the authorized transactions, each represented as a
-     *         AuthorizedTransaction object.
+     * AuthorizedTransaction object.
      */
     public ArrayList<Transaction> getAuthorizedTransactions() {
         return authorized;
@@ -72,9 +112,8 @@ public class RBCHTMLDataExtractor {
 
 
     /**
-     *
      * @return An ArrayList of all the posted transactions, each represented as a
-     *         PostedTransaction object.
+     * PostedTransaction object.
      */
     public ArrayList<Transaction> getPostedTransactions() {
         return posted;
@@ -86,8 +125,7 @@ public class RBCHTMLDataExtractor {
      *
      * @throws IOException
      */
-    private void extractTransactions() throws IOException {
-        Document doc = Jsoup.parse(new File(statement.getAbsolutePath()), "UTF-8");
+    private void extractTransactions(Document doc) throws IOException {
         Elements tables = doc.select("table.contentframework");
         Element authorized = tables.get(AUTHORIZED_TRANSACTIONS);
         Element posted = tables.get(POSTED_TRANSACTIONS);
@@ -107,7 +145,6 @@ public class RBCHTMLDataExtractor {
      * Extracts all the authorized transactions, provided the authorized transactions table as a parameter.
      *
      * @param table The Authorized transactions table Element
-     *
      * @return ArrayList of the Transactions.
      */
     private ArrayList<Transaction> extractTransactions(Element table, String type) {
@@ -123,6 +160,8 @@ public class RBCHTMLDataExtractor {
             LocalDate date = LocalDate.parse(data.get(TRANSACTION_DATE).html(), format);
             String description = data.get(TRANSACTION_DESCRIPTION).html().replace("<br>", "");
             double amount;
+            Element debit = data.get(TRANSACTION_DEBIT_AMOUNT);
+            Element credit = data.get(TRANSACTION_CREDIT_AMOUNT);
 
             /**
              * The whole if-else block is mainly testing whether the current transaction of the iteration is
@@ -130,8 +169,7 @@ public class RBCHTMLDataExtractor {
              * and it is not empty then it must be a debit transaction. Otherwise, the only other option is a
              * credit transaction.
              */
-            if (data.get(TRANSACTION_DEBIT_AMOUNT).children().size() == 0
-                    && !data.get(TRANSACTION_DEBIT_AMOUNT).html().isEmpty()) {
+            if (debit.children().size() == 0 && !debit.html().isEmpty()) {
                 amount = Double.valueOf(data.get(TRANSACTION_DEBIT_AMOUNT).html());
             } else {
 
@@ -140,7 +178,7 @@ public class RBCHTMLDataExtractor {
                  * In order to get the amount, the inner class that makes the text green must be
                  * accessed and its value taken.
                  */
-                amount = Double.valueOf(data.get(TRANSACTION_CREDIT_AMOUNT).child(0).html().replace(",",""));
+                amount = Double.valueOf(credit.child(0).html().replace(",", ""));
             }
 
             transactions.add(new Transaction(description, date, amount,
@@ -156,7 +194,6 @@ public class RBCHTMLDataExtractor {
      * Sorts the transactions by date (reverse chronological order).
      *
      * @param transactions The 'unsorted' transactions.
-     *
      * @return The sorted transactions
      */
     private ArrayList<Transaction> sortByDate(ArrayList<Transaction> transactions) {
