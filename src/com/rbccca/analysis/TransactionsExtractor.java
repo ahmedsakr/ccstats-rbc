@@ -1,3 +1,19 @@
+/**
+ * Copyright (c) 2015 Ahmed Sakr
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rbccca.analysis;
 
 
@@ -22,7 +38,7 @@ import java.util.ArrayList;
  */
 public class TransactionsExtractor {
 
-    private ArrayList<Transaction> authorized, posted, transactions;
+    private TransactionsPool authorized, posted, transactions;
 
 
     /**
@@ -95,27 +111,27 @@ public class TransactionsExtractor {
 
 
     /**
-     * @return An ArrayList of All transactions. (authorized and posted)
+     * @return A TransactionsPool Object of All transactions. (authorized and posted)
      */
-    public ArrayList<Transaction> getTransactions() {
+    public TransactionsPool getTransactions() {
         return transactions;
     }
 
 
     /**
-     * @return An ArrayList of all the authorized transactions, each represented as a
+     * @return A TransactionsPool Object of all the authorized transactions, each represented as a
      * AuthorizedTransaction object.
      */
-    public ArrayList<Transaction> getAuthorizedTransactions() {
+    public TransactionsPool getAuthorizedTransactions() {
         return authorized;
     }
 
 
     /**
-     * @return An ArrayList of all the posted transactions, each represented as a
+     * @return A TransactionsPool Object of all the posted transactions, each represented as a
      * PostedTransaction object.
      */
-    public ArrayList<Transaction> getPostedTransactions() {
+    public TransactionsPool getPostedTransactions() {
         return posted;
     }
 
@@ -133,7 +149,7 @@ public class TransactionsExtractor {
         this.authorized = extractTransactions(authorized, "authorized");
         this.posted = extractTransactions(posted, "posted");
 
-        this.transactions = new ArrayList<>();
+        this.transactions = new TransactionsPool();
         this.transactions.addAll(this.authorized);
         this.transactions.addAll(this.posted);
         this.transactions = sortByDate(this.transactions);
@@ -145,10 +161,10 @@ public class TransactionsExtractor {
      * Extracts all the authorized transactions, provided the authorized transactions table as a parameter.
      *
      * @param table The Authorized transactions table Element
-     * @return ArrayList of the Transactions.
+     * @return A TransactionsPool object of the Transactions.
      */
-    private ArrayList<Transaction> extractTransactions(Element table, String type) {
-        ArrayList<Transaction> transactions = new ArrayList<>();
+    private TransactionsPool extractTransactions(Element table, String type) {
+        TransactionsPool transactions = new TransactionsPool();
         Elements rows = table.getElementsByTag("tr");
         rows.remove(0); // this row is just for the headers of the table (description, pending debit, pending credit)
 
@@ -194,10 +210,10 @@ public class TransactionsExtractor {
      * Sorts the transactions by date (reverse chronological order).
      *
      * @param transactions The 'unsorted' transactions.
-     * @return The sorted transactions
+     * @return The sorted transactions in a TransactionsPool object.
      */
-    private ArrayList<Transaction> sortByDate(ArrayList<Transaction> transactions) {
-        ArrayList<Transaction> sorted = new ArrayList<>();
+    private TransactionsPool sortByDate(TransactionsPool transactions) {
+        TransactionsPool sorted = new TransactionsPool();
 
         for (Transaction transaction : transactions) {
             int i = 0;

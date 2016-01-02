@@ -1,3 +1,19 @@
+/**
+ * Copyright (c) 2015 Ahmed Sakr
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.rbccca.analysis;
 
 
@@ -7,6 +23,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 
 
 /**
@@ -31,7 +48,72 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * @param transactions The ArrayList with elements to be appended to the object.
      */
     public TransactionsPool(ArrayList<Transaction> transactions) {
-        super(transactions);
+        sortByDate(transactions);
+    }
+
+
+    /**
+     * Override is necessary to assure that every time this method is called, the list remains
+     * sorted.
+     *
+     * @param transaction The transaction being appended to the list.
+     *
+     * @return True always as this method calls add(index, E e) that is void.
+     */
+    @Override
+    public boolean add(Transaction transaction) {
+        int i = 0;
+
+        while (i < this.size() && this.get(i).getDate().isAfter(transaction.getDate())) {
+            i++;
+        }
+
+        this.add(i, transaction);
+
+        return true;
+    }
+
+
+
+    /**
+     * Override is necessary to assure that every time this method is called, the list remains
+     * sorted. Every single element in the collection is tested and its ideal place in the
+     * transactions list is found, appending it to that index.
+     *
+     * @param transactions The transactions collection being appended to the list.
+     *
+     * @return True always as this method calls add(index, E e) that is void.
+     */
+    @Override
+    public boolean addAll(Collection<? extends Transaction> transactions) {
+        Transaction[] tranArr = (Transaction[]) transactions.toArray();
+        for (Transaction transaction : tranArr) {
+            int i = 0;
+
+            while (i < tranArr.length && tranArr[i].getDate().isAfter(transaction.getDate())) {
+                i++;
+            }
+
+            this.add(i, transaction);
+        }
+
+        return true;
+    }
+
+
+    /**
+     * Sorts the transactions by date (reverse chronological order).
+     */
+    private void sortByDate(ArrayList<Transaction> transactions) {
+        for (Transaction transaction : transactions) {
+            int i = 0;
+
+            while (i < transactions.size() && transactions.get(i).getDate().isAfter(transaction.getDate())) {
+                i++;
+            }
+
+            this.add(i, transaction);
+        }
     }
 
 
@@ -162,27 +244,32 @@ public class TransactionsPool extends ArrayList<Transaction> {
 
     /**
      * Acquires the days between the earliest date and latest date found in the transactions.
+     * Please note this method has been programmed with a precondition that the list of transactions
+     * is sorted at all times. The very first element in the array (index = 0) is the latest, and the last
+     * element is the earliest transaction found.
      *
      * @return The amount of days between the earliest and latest dates, including both dates which
      * is why + 1 has been added to the return statement.
      */
-    public long getDateRange() {
-        LocalDate earliest = this.get(0).getDate(), latest = this.get(0).getDate();
-
-        for (Transaction transaction : this) {
-            LocalDate date = transaction.getDate();
-
-            if (date.isBefore(earliest)) {
-                earliest = transaction.getDate();
-            }
-
-            if (date.isAfter(latest)) {
-                latest = transaction.getDate();
-            }
-        }
-
+    public long getDaysSize() {
+        LocalDate latest = this.get(0).getDate();
+        LocalDate earliest = this.get(this.size() - 1).getDate();
 
         return ChronoUnit.DAYS.between(earliest, latest) + 1;
+    }
+
+
+    /**
+     * Acquires the latest and earliest dates found in the statement, and returns an array of length
+     * 2 elements that contains the earliest and latest LocalDate Objects respectively.
+     *
+     * @return The LocalDate[] of the LocalDates.
+     */
+    public LocalDate[] getDateRange() {
+        LocalDate latest = this.get(0).getDate();
+        LocalDate earliest = this.get(this.size() - 1).getDate();
+
+        return new LocalDate[]{earliest, latest};
     }
 
 
@@ -192,7 +279,7 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * @return The average amount spent per day.
      */
     public double getAverageDay() {
-        return getTotalDue() / getDateRange();
+        return getTotalDue() / getDaysSize();
     }
 
 

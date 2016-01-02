@@ -21,6 +21,8 @@ package com.rbccca.analysis.data;
 import com.rbccca.analysis.TransactionsExtractor;
 import com.rbccca.analysis.TransactionsPool;
 
+import java.util.Date;
+
 
 /**
  *
@@ -42,8 +44,8 @@ public class Statement extends TransactionsPool {
     public Statement(TransactionsExtractor extractor) {
         super(extractor.getTransactions());
 
-        this.authorized = new TransactionsPool(extractor.getAuthorizedTransactions());
-        this.posted = new TransactionsPool(extractor.getPostedTransactions());
+        this.authorized = extractor.getAuthorizedTransactions();
+        this.posted = extractor.getPostedTransactions();
     }
 
 
