@@ -24,11 +24,11 @@ import com.rbccca.analysis.data.Statement;
  * @author Ahmed Sakr
  * @since January 2, 2016.
  */
-public class EncryptedStatementSave {
+public class EncryptedSave {
 
     private Statement statement;
 
-    public EncryptedStatementSave(Statement statement) {
+    public EncryptedSave(Statement statement) {
         this.statement = statement;
     }
 }

@@ -45,8 +45,8 @@ public class TransactionsExtractor {
      * Final integers declaring the indices to be used when accessing the statement tables. Mainly
      * to avoid magic numbers that might cause confusion.
      */
-    private static final int AUTHORIZED_TRANSACTIONS = 2, POSTED_TRANSACTIONS = 3;
-    private static final int TRANSACTION_DATE = 0, TRANSACTION_DESCRIPTION = 1, TRANSACTION_DEBIT_AMOUNT = 2, TRANSACTION_CREDIT_AMOUNT = 3;
+    private static final int AUTHORIZED_TRANSACTIONS = 0, POSTED_TRANSACTIONS = 1;
+    private static final int TRANSACTION_DESCRIPTION = 0, TRANSACTION_DEBIT_AMOUNT = 1, TRANSACTION_CREDIT_AMOUNT = 2;
 
 
     /**
@@ -142,7 +142,7 @@ public class TransactionsExtractor {
      * @throws IOException
      */
     private void extractTransactions(Document doc) throws IOException {
-        Elements tables = doc.select("table.contentframework");
+        Elements tables = doc.select("table");
         Element authorized = tables.get(AUTHORIZED_TRANSACTIONS);
         Element posted = tables.get(POSTED_TRANSACTIONS);
 
@@ -170,14 +170,19 @@ public class TransactionsExtractor {
 
         for (Element transaction : rows) {
             Elements data = transaction.getElementsByTag("td");
+            Element debit, credit;
+            LocalDate date;
+            String description;
+            double amount;
 
             // all dates provided in the statement are in the format MMM dd, yyy (i.e Dec 14, 2015)
             DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy");
-            LocalDate date = LocalDate.parse(data.get(TRANSACTION_DATE).html(), format);
-            String description = data.get(TRANSACTION_DESCRIPTION).html().replace("<br>", "");
-            double amount;
-            Element debit = data.get(TRANSACTION_DEBIT_AMOUNT);
-            Element credit = data.get(TRANSACTION_CREDIT_AMOUNT);
+
+            // the date is set as the table header ('th' tag) for every row, and not a 'td' tag
+            date = LocalDate.parse(transaction.getElementsByTag("th").get(0).html().trim(), format);
+            description = data.get(TRANSACTION_DESCRIPTION).html().trim().replace("<br>", "");
+            debit = data.get(TRANSACTION_DEBIT_AMOUNT);
+            credit = data.get(TRANSACTION_CREDIT_AMOUNT);
 
             /**
              * The whole if-else block is mainly testing whether the current transaction of the iteration is
@@ -186,7 +191,7 @@ public class TransactionsExtractor {
              * credit transaction.
              */
             if (debit.children().size() == 0 && !debit.html().isEmpty()) {
-                amount = Double.valueOf(data.get(TRANSACTION_DEBIT_AMOUNT).html());
+                amount = Double.valueOf(data.get(TRANSACTION_DEBIT_AMOUNT).html().trim().replace("$", ""));
             } else {
 
                 /**
@@ -194,12 +199,11 @@ public class TransactionsExtractor {
                  * In order to get the amount, the inner class that makes the text green must be
                  * accessed and its value taken.
                  */
-                amount = Double.valueOf(credit.child(0).html().replace(",", ""));
+                amount = Double.valueOf(credit.html().trim().replace(",", "").replace("$", ""));
             }
 
             transactions.add(new Transaction(description, date, amount,
-                    data.get(TRANSACTION_DEBIT_AMOUNT).children().size() == 0
-                            && !data.get(TRANSACTION_DEBIT_AMOUNT).html().isEmpty(), type.equals("authorized")));
+                    debit.children().size() == 0 && !debit.html().isEmpty(), type.equals("authorized")));
         }
 
         return transactions;

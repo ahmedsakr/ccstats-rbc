@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 
 /**
@@ -86,11 +87,10 @@ public class TransactionsPool extends ArrayList<Transaction> {
      */
     @Override
     public boolean addAll(Collection<? extends Transaction> transactions) {
-        Transaction[] tranArr = (Transaction[]) transactions.toArray();
-        for (Transaction transaction : tranArr) {
-            int i = 0;
+        for (Transaction transaction : transactions) {
 
-            while (i < tranArr.length && tranArr[i].getDate().isAfter(transaction.getDate())) {
+            int i = 0;
+            while (i < this.size() && this.get(i).getDate().isAfter(transaction.getDate())) {
                 i++;
             }
 
