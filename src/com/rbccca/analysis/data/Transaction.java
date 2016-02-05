@@ -97,6 +97,11 @@ public class Transaction {
     }
 
 
+    /**
+     * Overriding the toString() Object method to return all attributes of the transaction.
+     *
+     * @return The attributes of the transaction.
+     */
     @Override
     public String toString() {
         String status = isAuthorized() ? "Authorized": "Posted";
@@ -104,6 +109,27 @@ public class Transaction {
 
         return String.format("[Status: %s, Type: %s, Description: %s, Amount: %s, Date: %s.]"
                 , status, type, getDescription(), Math.abs(getAmount()), getDate().toString());
+    }
+
+
+    /**
+     * Overriding the equals() Object method to check if the transaction being compared has the exact same
+     * attributes as this instance.
+     *
+     * @param other The other object.
+     * @return True if the object is the same instance or different but exact attributes
+     *         False otherwise.
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof Transaction)) {
+            return false;
+        } else if (other != this) {
+            Transaction transaction = (Transaction) other;
+            return this.toString().equals(transaction.toString());
+        }
+
+        return super.equals(other);
     }
 
 }
