@@ -35,7 +35,7 @@ try {
         , timmies.getAverageTransaction());
 
     // gets all transactions that are under 10 bucks and outputs them!
-    Transactio**nPool under10bucks = statement.getTransactionsFrom(0.0, 10);
+    TransactionPool under10bucks = statement.getTransactionsFrom(0.0, 10);
     under10bucks.forEach(System.out::println);
 
     // gets all transactions in the month of january and outputs them!
