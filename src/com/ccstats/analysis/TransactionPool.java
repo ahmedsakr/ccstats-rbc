@@ -17,8 +17,7 @@
 package com.ccstats.analysis;
 
 
-import com.ccstats.analysis.data.TransactionFrequency;
-import com.ccstats.analysis.data.Transaction;
+import com.ccstats.data.Transaction;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -53,7 +52,7 @@ public class TransactionPool extends ArrayList<Transaction> {
      * @param transaction The Transaction to be added in the TransactionPool.
      */
     public TransactionPool(Transaction transaction) {
-        updateRecurringTransactions(transaction);
+        this.add(transaction);
     }
 
     /**
@@ -300,6 +299,10 @@ public class TransactionPool extends ArrayList<Transaction> {
      * @see this#getDaysSize()
      */
     public double getAverageDay() {
+        if (getDaysSize() == 0) {
+            return 0;
+        }
+
         return getTotalDue() / getDaysSize();
     }
 

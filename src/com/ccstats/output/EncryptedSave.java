@@ -17,7 +17,7 @@
 package com.ccstats.output;
 
 
-import com.ccstats.analysis.data.Statement;
+import com.ccstats.data.Statement;
 
 /**
  *

@@ -15,11 +15,11 @@
  */
 
 
-package com.ccstats.analysis.data;
+package com.ccstats.data;
 
 
 import com.ccstats.analysis.TransactionPool;
-import com.ccstats.analysis.TransactionsExtractor;
+import com.ccstats.worker.TransactionsExtractor;
 
 
 /**

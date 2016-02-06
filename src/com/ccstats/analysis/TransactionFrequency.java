@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.ccstats.analysis.data;
+package com.ccstats.analysis;
 
+
+import com.ccstats.data.Transaction;
 
 /**
  *

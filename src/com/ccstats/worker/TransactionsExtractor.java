@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.ccstats.analysis;
+package com.ccstats.worker;
 
 
-import com.ccstats.analysis.data.Transaction;
+import com.ccstats.analysis.TransactionPool;
+import com.ccstats.data.Transaction;
 import com.ccstats.input.CreditStatement;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -150,9 +151,7 @@ public class TransactionsExtractor {
 
         this.transactions = new TransactionPool();
         this.transactions.addAll(this.authorized);
-        System.out.println(this.transactions.size());
         this.transactions.addAll(this.posted);
-        System.out.println(this.transactions.size());
 
     }
 
