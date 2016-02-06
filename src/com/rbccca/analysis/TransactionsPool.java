@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 
 /**
@@ -69,7 +68,7 @@ public class TransactionsPool extends ArrayList<Transaction> {
             i++;
         }
 
-        this.add(i, transaction);
+        super.add(i, transaction);
 
         return true;
     }
@@ -94,7 +93,7 @@ public class TransactionsPool extends ArrayList<Transaction> {
                 i++;
             }
 
-            this.add(i, transaction);
+            super.add(i, transaction);
         }
 
         return true;
@@ -273,6 +272,11 @@ public class TransactionsPool extends ArrayList<Transaction> {
     }
 
 
+    public double getAverageTransaction() {
+        return getTotalDue() / this.size();
+    }
+
+
     /**
      * Calculates the average amount spent per day from the date range that has transactions only.
      *
@@ -280,6 +284,16 @@ public class TransactionsPool extends ArrayList<Transaction> {
      */
     public double getAverageDay() {
         return getTotalDue() / getDaysSize();
+    }
+
+
+    /**
+     * Acquires the average money spent, or projected to be spent, in a week.
+     *
+     * @return The average amount spent per week.
+     */
+    public double getAverageWeek() {
+        return getAverageDay() * 7;
     }
 
 
@@ -363,5 +377,24 @@ public class TransactionsPool extends ArrayList<Transaction> {
         }
 
         return leastExpensive;
+    }
+
+
+    /**
+     * Computes the standard deviation of the transactions' amount.
+     * The Standard Deviation indicates how spread out and random the data (every transaction's amount) are in
+     * this pool compared to the average value.
+     *
+     * @return The Standard Deviation.
+     */
+    public double getStandardDeviation() {
+        double weightedSum = 0.0;
+        double averageTransaction = getAverageTransaction();
+
+        for (Transaction transaction : this) {
+            weightedSum += Math.pow(transaction.getAmount() - averageTransaction, 2);
+        }
+
+        return Math.sqrt(weightedSum / this.size() - 1);
     }
 }
