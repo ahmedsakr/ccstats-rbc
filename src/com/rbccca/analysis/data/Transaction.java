@@ -114,7 +114,7 @@ public class Transaction {
 
     /**
      * Overriding the equals() Object method to check if the transaction being compared has the exact same
-     * attributes as this instance.
+     * attributes as this instance. Two Transactions are categorized equal if both the amount and description match.
      *
      * @param other The other object.
      * @return True if the object is the same instance or different but exact attributes
@@ -126,7 +126,9 @@ public class Transaction {
             return false;
         } else if (other != this) {
             Transaction transaction = (Transaction) other;
-            return this.toString().equals(transaction.toString());
+            boolean equalAmount = this.getAmount() == transaction.getAmount();
+            boolean equalName = this.getDescription().equals(transaction.getDescription());
+            return equalAmount && equalName;
         }
 
         return super.equals(other);

@@ -17,6 +17,7 @@
 package com.rbccca.analysis;
 
 
+import com.rbccca.analysis.data.TransactionFrequency;
 import com.rbccca.analysis.data.Transaction;
 
 import java.time.LocalDate;
@@ -24,6 +25,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 
 
 /**
@@ -32,6 +35,8 @@ import java.util.Collection;
  * @since December 17, 2015.
  */
 public class TransactionsPool extends ArrayList<Transaction> {
+
+    private HashMap<Transaction, TransactionFrequency> frequencies = new HashMap<>();
 
 
     /**
@@ -43,12 +48,22 @@ public class TransactionsPool extends ArrayList<Transaction> {
 
 
     /**
+     * Constructs a new TransactionsPool object with only one transaction in the pool.
+     *
+     * @param transaction The Transaction to be added in the TransactionsPool.
+     */
+    public TransactionsPool(Transaction transaction) {
+        updateRecurringTransactions(transaction);
+    }
+
+    /**
      * Constructs a new TransactionsPool object, and transfers all elements in the ArrayList to the object.
      *
      * @param transactions The ArrayList with elements to be appended to the object.
      */
     public TransactionsPool(ArrayList<Transaction> transactions) {
         sortByDate(transactions);
+        discoverRecurringTransactions();
     }
 
 
@@ -68,9 +83,17 @@ public class TransactionsPool extends ArrayList<Transaction> {
             i++;
         }
 
+        updateRecurringTransactions(transaction);
         super.add(i, transaction);
 
         return true;
+    }
+
+
+    @Override
+    public void add(int i, Transaction transaction) {
+        super.add(i, transaction);
+        updateRecurringTransactions(transaction);
     }
 
 
@@ -87,13 +110,7 @@ public class TransactionsPool extends ArrayList<Transaction> {
     @Override
     public boolean addAll(Collection<? extends Transaction> transactions) {
         for (Transaction transaction : transactions) {
-
-            int i = 0;
-            while (i < this.size() && this.get(i).getDate().isAfter(transaction.getDate())) {
-                i++;
-            }
-
-            super.add(i, transaction);
+            add(transaction);
         }
 
         return true;
@@ -201,6 +218,8 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * @param date1 The beginning date.
      * @param date2 The (exclusive) ending date.
      * @return The TransactionsPool object of all transactions between the required dates.
+     * @see this#isAfterOrEqual(LocalDate, LocalDate)
+     * @see this#isBeforeOrEqual(LocalDate, LocalDate)
      */
     public TransactionsPool getTransactionsFrom(String date1, String date2) {
         LocalDate date3 = LocalDate.parse(date1, DateTimeFormatter.ofPattern("MMM dd, yyyy"));
@@ -281,6 +300,8 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * Calculates the average amount spent per day from the date range that has transactions only.
      *
      * @return The average amount spent per day.
+     * @see this#getTotalDue()
+     * @see this#getDaysSize()
      */
     public double getAverageDay() {
         return getTotalDue() / getDaysSize();
@@ -291,6 +312,7 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * Acquires the average money spent, or projected to be spent, in a week.
      *
      * @return The average amount spent per week.
+     * @see this#getAverageDay()
      */
     public double getAverageWeek() {
         return getAverageDay() * 7;
@@ -309,6 +331,7 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * @param date1 The earliest date of transactions to collect
      * @param date2 The latest date of transactions to collect.
      * @return The average amount spent between date1 and date2.
+     * @see this#getTransactionsFrom(String, String)
      */
     public double getAverageFrom(String date1, String date2) {
         TransactionsPool pool = getTransactionsFrom(date1, date2);
@@ -337,6 +360,27 @@ public class TransactionsPool extends ArrayList<Transaction> {
             if (transaction.getDescription().equalsIgnoreCase(keyword)
                     || (startWith && transaction.getDescription().startsWith(keyword))) {
                 pool.add(transaction);
+            }
+        }
+
+        return pool;
+    }
+
+
+    /**
+     * Computes and gathers all transactions that are equal to the provided transaction object. In other words,
+     * all transactions that have the same description and amount.
+     *
+     * @param transaction The Transaction used to find other equal transactions
+     *
+     * @return A TransactionPool object for all the transactions.
+     * @see Transaction#equals(Object)
+     */
+    public TransactionsPool getTransactionsEqualTo(Transaction transaction) {
+        TransactionsPool pool = new TransactionsPool();
+        for (Transaction tran : this) {
+            if (tran.equals(transaction)) {
+                pool.add(tran);
             }
         }
 
@@ -386,6 +430,7 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * this pool compared to the average value.
      *
      * @return The Standard Deviation.
+     * @see this#getAverageTransaction()
      */
     public double getStandardDeviation() {
         double weightedSum = 0.0;
@@ -395,6 +440,74 @@ public class TransactionsPool extends ArrayList<Transaction> {
             weightedSum += Math.pow(transaction.getAmount() - averageTransaction, 2);
         }
 
-        return Math.sqrt(weightedSum / this.size() - 1);
+        return Math.sqrt(weightedSum / (this.size() - 1));
+    }
+
+
+    /**
+     * Updates the recurring transactions HashMap accordingly. If no entry exists for the transaction, one
+     * is created and initialized.
+     *
+     * @param transaction The transaction to be inserted or updated in the recurring transactions HashMap.
+     */
+    private void updateRecurringTransactions(Transaction transaction) {
+        Iterator<Transaction> iterator = frequencies.keySet().iterator();
+        while (iterator.hasNext()) {
+            Transaction transaction2 = iterator.next();
+            if (transaction.equals(transaction2)) {
+                frequencies.get(transaction2).increment();
+                return;
+            }
+        }
+
+        frequencies.put(transaction, new TransactionFrequency(transaction, 1));
+    }
+
+
+
+    /**
+     * Discovers all transactions that are repeating, and bundles them into a HashMap that holds a frequency
+     * table for every transaction (key) and the TransactionFrequency (value) containing some vital information
+     * regarding the description, amount, and frequency of the transaction.
+     *
+     * @see this#getTransactionsEqualTo(Transaction)
+     */
+    private void discoverRecurringTransactions() {
+        frequencies.clear();
+        TransactionsPool copy = this;
+
+        while (copy.size() > 0) {
+            Transaction transaction = copy.get(0);
+            TransactionsPool pool = getTransactionsEqualTo(transaction);
+            TransactionFrequency frequency = new TransactionFrequency(transaction, pool.size());
+            this.frequencies.put(transaction, frequency);
+
+            for (Transaction transaction1 : pool) {
+                copy.remove(transaction1);
+            }
+        }
+    }
+
+
+    /**
+     * Searches the frequency HashMap for the transaction that holds the most amount of recurrences, that is a public
+     * attribute in the TransactionFrequency Object.
+     *
+     * @return The Transaction that is the most common in this TransactionsPool instance.
+     */
+    public Transaction getMostRecurringTransaction() {
+        Transaction mostCommon = frequencies.keySet().iterator().next();
+
+        for (Transaction transaction : frequencies.keySet()) {
+
+            TransactionFrequency freq1 = frequencies.get(transaction);
+            TransactionFrequency freq2 = frequencies.get(mostCommon);
+
+            if (freq1.getFrequency() >= freq2.getFrequency()) {
+                mostCommon = transaction;
+            }
+        }
+
+        return mostCommon;
     }
 }
