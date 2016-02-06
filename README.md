@@ -35,11 +35,11 @@ try {
         , timmies.getAverageTransaction());
 
     // gets all transactions that are under 10 bucks and outputs them!
-    TransactionPool under10bucks = statement.getTransactionsFrom(0.0, 10);
+    Transactio**nPool under10bucks = statement.getTransactionsFrom(0.0, 10);
     under10bucks.forEach(System.out::println);
 
     // gets all transactions in the month of january and outputs them!
-    TransactionPool january = statement.getTransactionsFrom("Jan 01, 2016", "January 31, 2016");
+    TransactionPool january = statement.getTransactionsFrom("Jan 01, 2016", "Jan 31, 2016");
     january.forEach(System.out::println);
 
 } catch (InvalidStatementPathException e) {
@@ -49,6 +49,10 @@ try {
 Releases
 =====
 ---
+**WARNING**: Release **0.1.35** has been detected to fail at collecting transactions correctly. A critical update
+has been applied and is now effective as of **0.1.40**.
+
+
 **WARNING**: Releases **[0.1.00, 0.1.10]** have been deprecated in result of the data-extraction algorithm becoming
 obsolete due to RBC discontinuing the old UI. Statements produced from the new UI will not work with these versions.
 Please consider installing **v0.1.20** or later.
@@ -58,7 +62,8 @@ Please consider installing **v0.1.20** or later.
           [0.1.20](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.20),
           [0.1.21](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.21),
           [0.1.30](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.30),
-          [0.1.35](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.35)]
+          [0.1.35](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.35),
+          [0.1.40](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.40)]
 
 
 Currently this is still an active development project. Stay tuned!

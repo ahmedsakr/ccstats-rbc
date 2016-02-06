@@ -62,8 +62,7 @@ public class TransactionPool extends ArrayList<Transaction> {
      * @param transactions The ArrayList with elements to be appended to the object.
      */
     public TransactionPool(ArrayList<Transaction> transactions) {
-        sortByDate(transactions);
-        discoverRecurringTransactions();
+        this.addAll(transactions);
     }
 
 
@@ -119,22 +118,6 @@ public class TransactionPool extends ArrayList<Transaction> {
         }
 
         return true;
-    }
-
-
-    /**
-     * Sorts the transactions by date (reverse chronological order).
-     */
-    private void sortByDate(ArrayList<Transaction> transactions) {
-        for (Transaction transaction : transactions) {
-            int i = 0;
-
-            while (i < transactions.size() && transactions.get(i).getDate().isAfter(transaction.getDate())) {
-                i++;
-            }
-
-            this.add(i, transaction);
-        }
     }
 
 
@@ -474,31 +457,6 @@ public class TransactionPool extends ArrayList<Transaction> {
         }
 
         frequencies.put(transaction, new TransactionFrequency(transaction, 1));
-    }
-
-
-
-    /**
-     * Discovers all transactions that are repeating, and bundles them into a HashMap that holds a frequency
-     * table for every transaction (key) and the TransactionFrequency (value) containing some vital information
-     * regarding the description, amount, and frequency of the transaction.
-     *
-     * @see this#getTransactionsEqualTo(Transaction)
-     */
-    private void discoverRecurringTransactions() {
-        frequencies.clear();
-        TransactionPool copy = this;
-
-        while (copy.size() > 0) {
-            Transaction transaction = copy.get(0);
-            TransactionPool pool = getTransactionsEqualTo(transaction);
-            TransactionFrequency frequency = new TransactionFrequency(transaction, pool.size());
-            this.frequencies.put(transaction, frequency);
-
-            for (Transaction transaction1 : pool) {
-                copy.remove(transaction1);
-            }
-        }
     }
 
 

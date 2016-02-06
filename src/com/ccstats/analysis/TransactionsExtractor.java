@@ -150,8 +150,9 @@ public class TransactionsExtractor {
 
         this.transactions = new TransactionPool();
         this.transactions.addAll(this.authorized);
+        System.out.println(this.transactions.size());
         this.transactions.addAll(this.posted);
-        this.transactions = sortByDate(this.transactions);
+        System.out.println(this.transactions.size());
 
     }
 
@@ -206,28 +207,5 @@ public class TransactionsExtractor {
         }
 
         return transactions;
-    }
-
-
-    /**
-     * Sorts the transactions by date (reverse chronological order).
-     *
-     * @param transactions The 'unsorted' transactions.
-     * @return The sorted transactions in a TransactionPool object.
-     */
-    private TransactionPool sortByDate(TransactionPool transactions) {
-        TransactionPool sorted = new TransactionPool();
-
-        for (Transaction transaction : transactions) {
-            int i = 0;
-
-            while (i < sorted.size() && sorted.get(i).getDate().isAfter(transaction.getDate())) {
-                i++;
-            }
-
-            sorted.add(i, transaction);
-        }
-
-        return sorted;
     }
 }
