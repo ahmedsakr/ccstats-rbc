@@ -12,39 +12,39 @@ such as amount of transactions, actual total debit and credit grants, etc. **ccs
 Example
 =====
 ---
-```
-        try {
+```java
+try {
 
-            // CreditStatement supports .html and .htm files!
-            CreditStatement file = new CreditStatement("C:\\Users\\user_name\\Desktop\\statement.htm");
+    // CreditStatement supports .html and .htm files!
+    CreditStatement file = new CreditStatement("C:\\Users\\user_name\\Desktop\\statement.htm");
 
-            // does all the needed work to successfully extract all transactions so they are ready to be used.
-            TransactionsExtractor extractor = new TransactionsExtractor(file);
+    // does all the needed work to successfully extract all transactions so they are ready to be used.
+    TransactionsExtractor extractor = new TransactionsExtractor(file);
 
-            // receives all transactions, and bundles them into a Statement object that has specific methods
-            // regarding statements, in addition to the statistics method that the statement class inherits from.
-            Statement statement = new Statement(extractor);
+    // receives all transactions, and bundles them into a Statement object that has specific methods
+    // regarding statements, in addition to the statistics method that the statement class inherits from.
+    Statement statement = new Statement(extractor);
 
-            System.out.printf("I have spent a total of %.2f, and an average of %.2f daily!\n"
-                    , statement.getTotalDue(), statement.getAverageDay());
+    System.out.printf("I have spent a total of %.2f, and an average of %.2f daily!\n"
+        , statement.getTotalDue(), statement.getAverageDay());
 
-            // Gets all transactions that have descriptions that start with "tim hortons" and outputs them all!
-            TransactionPool timmies = statement.getTransactionsByDescription("tim hortons", true);
-            timmies.forEach(System.out::println);
-            System.out.printf("I have spent an average of %.2f on every transaction at tim hortons!"
-                    , timmies.getAverageTransaction());
+    // Gets all transactions that have descriptions that start with "tim hortons" and outputs them all!
+    TransactionPool timmies = statement.getTransactionsByDescription("tim hortons", true);
+    timmies.forEach(System.out::println);
+    System.out.printf("I have spent an average of %.2f on every transaction at tim hortons!"
+        , timmies.getAverageTransaction());
 
-            // gets all transactions that are under 10 bucks and outputs them!
-            TransactionPool under10bucks = statement.getTransactionsFrom(0.0, 10);
-            under10bucks.forEach(System.out::println);
+    // gets all transactions that are under 10 bucks and outputs them!
+    TransactionPool under10bucks = statement.getTransactionsFrom(0.0, 10);
+    under10bucks.forEach(System.out::println);
 
-            // gets all transactions in the month of january and outputs them!
-            TransactionPool january = statement.getTransactionsFrom("Jan 01, 2016", "January 31, 2016");
-            january.forEach(System.out::println);
+    // gets all transactions in the month of january and outputs them!
+    TransactionPool january = statement.getTransactionsFrom("Jan 01, 2016", "January 31, 2016");
+    january.forEach(System.out::println);
 
-        } catch (InvalidStatementPathException e) {
-            e.printStackTrace();
-        }
+} catch (InvalidStatementPathException e) {
+    e.printStackTrace();
+}
 ```
 Releases
 =====
