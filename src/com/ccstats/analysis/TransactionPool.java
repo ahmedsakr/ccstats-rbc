@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.rbccca.analysis;
+package com.ccstats.analysis;
 
 
-import com.rbccca.analysis.data.TransactionFrequency;
-import com.rbccca.analysis.data.Transaction;
+import com.ccstats.analysis.data.TransactionFrequency;
+import com.ccstats.analysis.data.Transaction;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -34,7 +34,7 @@ import java.util.Iterator;
  * @author Ahmed Sakr
  * @since December 17, 2015.
  */
-public class TransactionsPool extends ArrayList<Transaction> {
+public class TransactionPool extends ArrayList<Transaction> {
 
     private HashMap<Transaction, TransactionFrequency> frequencies = new HashMap<>();
 
@@ -42,26 +42,26 @@ public class TransactionsPool extends ArrayList<Transaction> {
     /**
      * Default constructor. Allows for no parameter construction of the class.
      */
-    public TransactionsPool() {
+    public TransactionPool() {
 
     }
 
 
     /**
-     * Constructs a new TransactionsPool object with only one transaction in the pool.
+     * Constructs a new TransactionPool object with only one transaction in the pool.
      *
-     * @param transaction The Transaction to be added in the TransactionsPool.
+     * @param transaction The Transaction to be added in the TransactionPool.
      */
-    public TransactionsPool(Transaction transaction) {
+    public TransactionPool(Transaction transaction) {
         updateRecurringTransactions(transaction);
     }
 
     /**
-     * Constructs a new TransactionsPool object, and transfers all elements in the ArrayList to the object.
+     * Constructs a new TransactionPool object, and transfers all elements in the ArrayList to the object.
      *
      * @param transactions The ArrayList with elements to be appended to the object.
      */
-    public TransactionsPool(ArrayList<Transaction> transactions) {
+    public TransactionPool(ArrayList<Transaction> transactions) {
         sortByDate(transactions);
         discoverRecurringTransactions();
     }
@@ -83,13 +83,18 @@ public class TransactionsPool extends ArrayList<Transaction> {
             i++;
         }
 
-        updateRecurringTransactions(transaction);
-        super.add(i, transaction);
+        add(i, transaction);
 
         return true;
     }
 
 
+    /**
+     * Overriding this add method as well to ensure that the list is always sorted.
+     *
+     * @param i The position in the pool where the transaction element is to be placed.
+     * @param transaction The transaction element being inserted into the pool.
+     */
     @Override
     public void add(int i, Transaction transaction) {
         super.add(i, transaction);
@@ -137,10 +142,10 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * Acquires all transactions that are of type debit. A Debit transaction is usually a payment
      * induced by the customer to pay off previous credit transactions.
      *
-     * @return The TransactionsPool of the debit transactions.
+     * @return The TransactionPool of the debit transactions.
      */
-    public TransactionsPool getDebitTransactions() {
-        TransactionsPool pool = new TransactionsPool();
+    public TransactionPool getDebitTransactions() {
+        TransactionPool pool = new TransactionPool();
 
         for (Transaction transaction : this) {
             if (transaction.getAmount() < 0) {
@@ -155,10 +160,10 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * Acquires all transactions that are of type credit. A Credit transaction is usually a credit
      * usage of the credit card.
      *
-     * @return The TransactionsPool of the credit transactions.
+     * @return The TransactionPool of the credit transactions.
      */
-    public TransactionsPool getCreditTransactions() {
-        TransactionsPool pool = new TransactionsPool();
+    public TransactionPool getCreditTransactions() {
+        TransactionPool pool = new TransactionPool();
 
         for (Transaction transaction : this) {
             if (transaction.getAmount() >= 0) {
@@ -217,14 +222,14 @@ public class TransactionsPool extends ArrayList<Transaction> {
      *
      * @param date1 The beginning date.
      * @param date2 The (exclusive) ending date.
-     * @return The TransactionsPool object of all transactions between the required dates.
+     * @return The TransactionPool object of all transactions between the required dates.
      * @see this#isAfterOrEqual(LocalDate, LocalDate)
      * @see this#isBeforeOrEqual(LocalDate, LocalDate)
      */
-    public TransactionsPool getTransactionsFrom(String date1, String date2) {
+    public TransactionPool getTransactionsFrom(String date1, String date2) {
         LocalDate date3 = LocalDate.parse(date1, DateTimeFormatter.ofPattern("MMM dd, yyyy"));
         LocalDate date4 = LocalDate.parse(date2, DateTimeFormatter.ofPattern("MMM dd, yyyy"));
-        TransactionsPool pool = new TransactionsPool();
+        TransactionPool pool = new TransactionPool();
 
         for (Transaction transaction : this) {
             LocalDate date = transaction.getDate();
@@ -244,10 +249,10 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * @param leastAmount The minimum amount a transaction must be to be collected.
      * @param highestAmount The maximum amount a transaction must be to be collected.
      *
-     * @return The TransactionsPool object of the transactions list.
+     * @return The TransactionPool object of the transactions list.
      */
-    public TransactionsPool getTransactionsFrom(double leastAmount, double highestAmount) {
-        TransactionsPool pool = new TransactionsPool();
+    public TransactionPool getTransactionsFrom(double leastAmount, double highestAmount) {
+        TransactionPool pool = new TransactionPool();
         for (Transaction transaction : this) {
             double amount = transaction.getAmount();
 
@@ -291,7 +296,15 @@ public class TransactionsPool extends ArrayList<Transaction> {
     }
 
 
+    /**
+     *
+     * @return The Average amount spent on a transaction.
+     */
     public double getAverageTransaction() {
+        if (this.size() == 0) {
+            return 0;
+        }
+
         return getTotalDue() / this.size();
     }
 
@@ -334,7 +347,7 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * @see this#getTransactionsFrom(String, String)
      */
     public double getAverageFrom(String date1, String date2) {
-        TransactionsPool pool = getTransactionsFrom(date1, date2);
+        TransactionPool pool = getTransactionsFrom(date1, date2);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
         long days = ChronoUnit.DAYS.between(LocalDate.parse(date1, formatter), LocalDate.parse(date2, formatter));
 
@@ -352,10 +365,10 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * @param keyword The keyword used to select transactions
      * @param startWith whether the transaction's description should be equal or startWith the keyword.
      *
-     * @return The TransactionsPool object of the transactions.
+     * @return The TransactionPool object of the transactions.
      */
-    public TransactionsPool getTransactionsByDescription(String keyword, boolean startWith) {
-        TransactionsPool pool = new TransactionsPool();
+    public TransactionPool getTransactionsByDescription(String keyword, boolean startWith) {
+        TransactionPool pool = new TransactionPool();
         for (Transaction transaction : this) {
             if (transaction.getDescription().equalsIgnoreCase(keyword)
                     || (startWith && transaction.getDescription().startsWith(keyword))) {
@@ -376,8 +389,8 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * @return A TransactionPool object for all the transactions.
      * @see Transaction#equals(Object)
      */
-    public TransactionsPool getTransactionsEqualTo(Transaction transaction) {
-        TransactionsPool pool = new TransactionsPool();
+    public TransactionPool getTransactionsEqualTo(Transaction transaction) {
+        TransactionPool pool = new TransactionPool();
         for (Transaction tran : this) {
             if (tran.equals(transaction)) {
                 pool.add(tran);
@@ -474,11 +487,11 @@ public class TransactionsPool extends ArrayList<Transaction> {
      */
     private void discoverRecurringTransactions() {
         frequencies.clear();
-        TransactionsPool copy = this;
+        TransactionPool copy = this;
 
         while (copy.size() > 0) {
             Transaction transaction = copy.get(0);
-            TransactionsPool pool = getTransactionsEqualTo(transaction);
+            TransactionPool pool = getTransactionsEqualTo(transaction);
             TransactionFrequency frequency = new TransactionFrequency(transaction, pool.size());
             this.frequencies.put(transaction, frequency);
 
@@ -493,9 +506,13 @@ public class TransactionsPool extends ArrayList<Transaction> {
      * Searches the frequency HashMap for the transaction that holds the most amount of recurrences, that is a public
      * attribute in the TransactionFrequency Object.
      *
-     * @return The Transaction that is the most common in this TransactionsPool instance.
+     * @return The Transaction that is the most common in this TransactionPool instance.
      */
-    public Transaction getMostRecurringTransaction() {
+    public Transaction getMostCommonTransaction() {
+        if (this.size() == 0) {
+            return null;
+        }
+
         Transaction mostCommon = frequencies.keySet().iterator().next();
 
         for (Transaction transaction : frequencies.keySet()) {

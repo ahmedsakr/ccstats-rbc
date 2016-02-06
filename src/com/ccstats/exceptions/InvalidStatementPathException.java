@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 Ahmed Sakr
+ * Copyright (c) 2015 Ahmed Sakr
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package com.rbccca.output;
+package com.ccstats.exceptions;
 
-
-import com.rbccca.analysis.data.Statement;
 
 /**
  *
  * @author Ahmed Sakr
- * @since January 2, 2016.
+ * @since November 29, 2015
  */
-public class EncryptedSave {
+public class InvalidStatementPathException extends Exception {
 
-    private Statement statement;
 
-    public EncryptedSave(Statement statement) {
-        this.statement = statement;
+    /**
+     * Default Exception constructor.
+     *
+     * @param error The error that triggered a InvalidStatementPathException.
+     */
+    public InvalidStatementPathException(String error) {
+        super(error);
     }
 }

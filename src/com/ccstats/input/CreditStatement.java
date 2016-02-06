@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.rbccca.input;
+package com.ccstats.input;
 
 
-import com.rbccca.exceptions.InvalidStatementPathException;
+import com.ccstats.exceptions.InvalidStatementPathException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

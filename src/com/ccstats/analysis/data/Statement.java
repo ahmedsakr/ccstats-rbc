@@ -15,13 +15,11 @@
  */
 
 
-package com.rbccca.analysis.data;
+package com.ccstats.analysis.data;
 
 
-import com.rbccca.analysis.TransactionsExtractor;
-import com.rbccca.analysis.TransactionsPool;
-
-import java.util.Date;
+import com.ccstats.analysis.TransactionPool;
+import com.ccstats.analysis.TransactionsExtractor;
 
 
 /**
@@ -29,10 +27,10 @@ import java.util.Date;
  * @author Ahmed Sakr
  * @since November 28, 2015.
  */
-public class Statement extends TransactionsPool {
+public class Statement extends TransactionPool {
 
 
-    private TransactionsPool authorized, posted;
+    private TransactionPool authorized, posted;
 
 
     /**
@@ -50,17 +48,17 @@ public class Statement extends TransactionsPool {
 
 
     /**
-     * @return The TransactionsPool object of the authorized transactions.
+     * @return The TransactionPool object of the authorized transactions.
      */
-    public TransactionsPool getAuthorizedTransactions() {
+    public TransactionPool getAuthorizedTransactions() {
         return authorized;
     }
 
 
     /**
-     * @return The TransactionsPool object of the posted transactions.
+     * @return The TransactionPool object of the posted transactions.
      */
-    public TransactionsPool getPostedTransactions() {
+    public TransactionPool getPostedTransactions() {
         return posted;
     }
 }

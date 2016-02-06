@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.rbccca.analysis.data;
+package com.ccstats.analysis.data;
 
 
 import java.time.LocalDate;

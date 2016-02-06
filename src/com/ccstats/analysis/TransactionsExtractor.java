@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.rbccca.analysis;
+package com.ccstats.analysis;
 
 
-import com.rbccca.analysis.data.Transaction;
-import com.rbccca.input.CreditStatement;
+import com.ccstats.analysis.data.Transaction;
+import com.ccstats.input.CreditStatement;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -37,7 +37,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class TransactionsExtractor {
 
-    private TransactionsPool authorized, posted, transactions;
+    private TransactionPool authorized, posted, transactions;
 
 
     /**
@@ -110,27 +110,27 @@ public class TransactionsExtractor {
 
 
     /**
-     * @return A TransactionsPool Object of All transactions. (authorized and posted)
+     * @return A TransactionPool Object of All transactions. (authorized and posted)
      */
-    public TransactionsPool getTransactions() {
+    public TransactionPool getTransactions() {
         return transactions;
     }
 
 
     /**
-     * @return A TransactionsPool Object of all the authorized transactions, each represented as a
+     * @return A TransactionPool Object of all the authorized transactions, each represented as a
      * AuthorizedTransaction object.
      */
-    public TransactionsPool getAuthorizedTransactions() {
+    public TransactionPool getAuthorizedTransactions() {
         return authorized;
     }
 
 
     /**
-     * @return A TransactionsPool Object of all the posted transactions, each represented as a
+     * @return A TransactionPool Object of all the posted transactions, each represented as a
      * PostedTransaction object.
      */
-    public TransactionsPool getPostedTransactions() {
+    public TransactionPool getPostedTransactions() {
         return posted;
     }
 
@@ -148,7 +148,7 @@ public class TransactionsExtractor {
         this.authorized = extractTransactions(authorized, "authorized");
         this.posted = extractTransactions(posted, "posted");
 
-        this.transactions = new TransactionsPool();
+        this.transactions = new TransactionPool();
         this.transactions.addAll(this.authorized);
         this.transactions.addAll(this.posted);
         this.transactions = sortByDate(this.transactions);
@@ -160,10 +160,10 @@ public class TransactionsExtractor {
      * Extracts all the authorized transactions, provided the authorized transactions table as a parameter.
      *
      * @param table The Authorized transactions table Element
-     * @return A TransactionsPool object of the Transactions.
+     * @return A TransactionPool object of the Transactions.
      */
-    private TransactionsPool extractTransactions(Element table, String type) {
-        TransactionsPool transactions = new TransactionsPool();
+    private TransactionPool extractTransactions(Element table, String type) {
+        TransactionPool transactions = new TransactionPool();
         Elements rows = table.getElementsByTag("tr");
         rows.remove(0); // this row is just for the headers of the table (description, pending debit, pending credit)
 
@@ -213,10 +213,10 @@ public class TransactionsExtractor {
      * Sorts the transactions by date (reverse chronological order).
      *
      * @param transactions The 'unsorted' transactions.
-     * @return The sorted transactions in a TransactionsPool object.
+     * @return The sorted transactions in a TransactionPool object.
      */
-    private TransactionsPool sortByDate(TransactionsPool transactions) {
-        TransactionsPool sorted = new TransactionsPool();
+    private TransactionPool sortByDate(TransactionPool transactions) {
+        TransactionPool sorted = new TransactionPool();
 
         for (Transaction transaction : transactions) {
             int i = 0;
