@@ -257,6 +257,10 @@ public class TransactionPool extends ArrayList<Transaction> {
      * is why + 1 has been added to the return statement.
      */
     public long getDaysSize() {
+        if (this.size() == 0) {
+            return 0;
+        }
+
         LocalDate latest = this.get(0).getDate();
         LocalDate earliest = this.get(this.size() - 1).getDate();
 
@@ -271,6 +275,10 @@ public class TransactionPool extends ArrayList<Transaction> {
      * @return The LocalDate[] of the LocalDates.
      */
     public LocalDate[] getDateRange() {
+        if (this.size() == 0) {
+            return null;
+        }
+
         LocalDate latest = this.get(0).getDate();
         LocalDate earliest = this.get(this.size() - 1).getDate();
 
@@ -299,7 +307,7 @@ public class TransactionPool extends ArrayList<Transaction> {
      * @see this#getDaysSize()
      */
     public double getAverageDay() {
-        if (getDaysSize() == 0) {
+        if (this.size() == 0) {
             return 0;
         }
 
@@ -393,6 +401,10 @@ public class TransactionPool extends ArrayList<Transaction> {
      * @return The Transaction object.
      */
     public Transaction getMostExpensive() {
+        if (this.size() == 0) {
+            return null;
+        }
+
         Transaction mostExpensive = this.get(0);
 
         for (Transaction transaction : this) {
@@ -411,6 +423,10 @@ public class TransactionPool extends ArrayList<Transaction> {
      * @return The Transaction object.
      */
     public Transaction getLeastExpensive() {
+        if (this.size() == 0) {
+            return null;
+        }
+
         Transaction leastExpensive = this.get(0);
 
         for (Transaction transaction : this) {
@@ -432,6 +448,10 @@ public class TransactionPool extends ArrayList<Transaction> {
      * @see this#getAverageTransaction()
      */
     public double getStandardDeviation() {
+        if (this.size() == 0 || this.size() == 1) {
+            return 0;
+        }
+
         double weightedSum = 0.0;
         double averageTransaction = getAverageTransaction();
 

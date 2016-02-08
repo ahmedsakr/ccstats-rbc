@@ -57,7 +57,7 @@ has been applied and is now effective as of **0.1.40**.
 obsolete due to RBC discontinuing the old UI. Statements produced from the new UI will not work with these versions.
 Please consider installing **v0.1.20** or later.
 
-**Latest build**: v[0.1.41](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.41)
+**Latest build**: v[0.1.42](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.42)
 
 License
 ====
