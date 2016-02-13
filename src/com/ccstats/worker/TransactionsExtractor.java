@@ -45,7 +45,7 @@ public class TransactionsExtractor {
      * Final integers declaring the indices to be used when accessing the statement tables. Mainly
      * to avoid magic numbers that might cause confusion.
      */
-    private static final int AUTHORIZED_TRANSACTIONS = 0, POSTED_TRANSACTIONS = 1;
+    private static final int AUTHORIZED_TRANSACTIONS = 1, POSTED_TRANSACTIONS = 2;
     private static final int TRANSACTION_DESCRIPTION = 0, TRANSACTION_DEBIT_AMOUNT = 1, TRANSACTION_CREDIT_AMOUNT = 2;
 
 

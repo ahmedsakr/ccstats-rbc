@@ -49,15 +49,15 @@ try {
 Releases
 =====
 ---
+
+**WARNING**: Releases **[0.1.00, 0.1.42]** have been deprecated in result of the data-extraction algorithm becoming
+obsolete due to RBC discontinuing the old UI. Statements produced from the new UI will not work with these versions.
+Please consider installing **v0.1.43** or later.
+
 **WARNING**: Release **0.1.35** has been detected to fail at collecting transactions correctly. A critical update
 has been applied and is now effective as of **0.1.40**.
 
-
-**WARNING**: Releases **[0.1.00, 0.1.10]** have been deprecated in result of the data-extraction algorithm becoming
-obsolete due to RBC discontinuing the old UI. Statements produced from the new UI will not work with these versions.
-Please consider installing **v0.1.20** or later.
-
-**Latest build**: v[0.1.42](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.42)
+**Latest build**: v[0.1.43](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.43)
 
 License
 ====

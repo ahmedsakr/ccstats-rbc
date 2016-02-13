@@ -37,7 +37,6 @@ public class TransactionPool extends ArrayList<Transaction> {
 
     private HashMap<Transaction, TransactionFrequency> frequencies = new HashMap<>();
 
-
     /**
      * Default constructor. Allows for no parameter construction of the class.
      */
@@ -158,18 +157,18 @@ public class TransactionPool extends ArrayList<Transaction> {
 
 
     /**
-     * Calculates the total amount due from all the posted and authorized transactions.
+     * Computes the Current outstanding balance of this transaction Pool.
      *
      * @return The Total Amount
      */
-    public double getTotalDue() {
-        double due = 0;
+    public double getBalance() {
+        double amount = 0;
 
         for (Transaction transaction : this) {
-            due += transaction.getAmount();
+            amount += transaction.getAmount();
         }
 
-        return due;
+        return amount;
     }
 
 
@@ -295,7 +294,7 @@ public class TransactionPool extends ArrayList<Transaction> {
             return 0;
         }
 
-        return getTotalDue() / this.size();
+        return getBalance() / this.size();
     }
 
 
@@ -303,7 +302,7 @@ public class TransactionPool extends ArrayList<Transaction> {
      * Calculates the average amount spent per day from the date range that has transactions only.
      *
      * @return The average amount spent per day.
-     * @see this#getTotalDue()
+     * @see this#getBalance()
      * @see this#getDaysSize()
      */
     public double getAverageDay() {
@@ -311,7 +310,7 @@ public class TransactionPool extends ArrayList<Transaction> {
             return 0;
         }
 
-        return getTotalDue() / getDaysSize();
+        return getBalance() / getDaysSize();
     }
 
 
@@ -345,7 +344,7 @@ public class TransactionPool extends ArrayList<Transaction> {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
         long days = ChronoUnit.DAYS.between(LocalDate.parse(date1, formatter), LocalDate.parse(date2, formatter));
 
-        return pool.getTotalDue() / (days + 1);
+        return pool.getBalance() / (days + 1);
     }
 
 
