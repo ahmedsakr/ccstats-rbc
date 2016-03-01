@@ -1,4 +1,4 @@
-**Dependencies**: Jsoup-1.8.3
+**Dependencies**: Jsoup-1.8.3, commons-codec-1.10
 
 ccstats-rbc
 =====

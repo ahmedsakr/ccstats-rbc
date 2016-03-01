@@ -18,10 +18,14 @@
 package com.ccstats.crypto;
 
 
+import org.apache.commons.codec.binary.Hex;
+
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -46,7 +50,7 @@ public class AESWorker {
      * @param text The plaintext to be encrypted
      * @param keyLength The length in bits of the key.
      *
-     * @return Tne Encrypted text.
+     * @return The Encrypted text.
      *
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
@@ -56,9 +60,11 @@ public class AESWorker {
      * @throws BadPaddingException
      * @throws IllegalBlockSizeException
      */
-    public byte[] encrypt(char[] password, String text, int keyLength) throws NoSuchAlgorithmException,
+    public char[] encrypt(char[] password, String text, int keyLength) throws NoSuchAlgorithmException,
             InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException,
             BadPaddingException, IllegalBlockSizeException {
+
+        password = hash(new String(password).getBytes(StandardCharsets.UTF_8));
 
         SecureRandom random = new SecureRandom();
         salt = new byte[20];
@@ -78,7 +84,8 @@ public class AESWorker {
         SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
 
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-        return cipher.doFinal(text.getBytes());
+        byte[] result = cipher.doFinal(text.getBytes());
+        return Hex.encodeHex(result);
     }
 
 
@@ -100,7 +107,7 @@ public class AESWorker {
      * @throws BadPaddingException
      * @throws IllegalBlockSizeException
      */
-    public byte[] encrypt(String password, String text, int keyLength) throws NoSuchAlgorithmException
+    public char[] encrypt(String password, String text, int keyLength) throws NoSuchAlgorithmException
             , InvalidKeySpecException , NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException
             , BadPaddingException, IllegalBlockSizeException {
         return encrypt(password.toCharArray(), text, keyLength);
@@ -123,12 +130,28 @@ public class AESWorker {
      * @throws BadPaddingException
      * @throws IllegalBlockSizeException
      */
-    public byte[] encrypt(String password, String text) throws NoSuchAlgorithmException, InvalidKeySpecException
+    public char[] encrypt(String password, String text) throws NoSuchAlgorithmException, InvalidKeySpecException
             , NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, BadPaddingException
             , IllegalBlockSizeException {
         return encrypt(password.toCharArray(), text, 256);
     }
 
+
+    /**
+     * Hashes the plain password to provide a more secure experience.
+     *
+     * @param password the bytes of the plaintext password.
+     * @return The hashed password's characters in an array.
+     *
+     * @throws NoSuchAlgorithmException
+     */
+    private char[] hash(byte[] password) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.reset();
+        md.update(password);
+
+        return Hex.encodeHex(md.digest());
+    }
 
     /**
      * Be careful while using this method: The salt auto destroys after one call for security measures. You
@@ -138,7 +161,7 @@ public class AESWorker {
      *
      * @return The Latest salt used to encrypt text, and automatically null the attribute.
      */
-    public byte[] getSaltAutoDestroy() {
+    public byte[] getLatestSaltAutoDestroy() {
         byte[] temp = salt;
         salt = null;
 
