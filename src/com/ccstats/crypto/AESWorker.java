@@ -61,7 +61,7 @@ public class AESWorker {
             BadPaddingException, IllegalBlockSizeException {
 
         SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[20];
+        salt = new byte[20];
         random.nextBytes(salt);
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
