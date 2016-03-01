@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ccstats.worker;
+package com.ccstats.analysis.worker;
 
 
 import com.ccstats.analysis.TransactionPool;

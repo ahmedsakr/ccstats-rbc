@@ -19,7 +19,7 @@ package com.ccstats.data;
 
 
 import com.ccstats.analysis.TransactionPool;
-import com.ccstats.worker.TransactionsExtractor;
+import com.ccstats.analysis.worker.TransactionsExtractor;
 
 
 /**
@@ -60,5 +60,15 @@ public class Statement extends TransactionPool {
      */
     public TransactionPool getPostedTransactions() {
         return posted;
+    }
+
+
+    /**
+     * Merges a second statement into this statement.
+     *
+     * @param other The Second statement being merged into this statement.
+     */
+    public void merge(Statement other) {
+        this.addAll(other);
     }
 }

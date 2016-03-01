@@ -17,7 +17,7 @@
 package com.ccstats.input;
 
 
-import com.ccstats.exceptions.InvalidStatementPathException;
+import com.ccstats.input.exceptions.InvalidStatementPathException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
