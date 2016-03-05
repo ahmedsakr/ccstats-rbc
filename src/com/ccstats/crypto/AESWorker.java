@@ -39,6 +39,7 @@ public class AESWorker {
 
     private byte[] salt, ivBytes;
 
+
     /**
      * Through the power of the advanced encryption standard, a plaintext will be encrypted with a parameter-specified
      * password, an extra protective layer (salt), and a specified key length. Make sure to acquire the salt and ivBytes
@@ -117,6 +118,29 @@ public class AESWorker {
             InvalidKeySpecException , NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException,
             BadPaddingException, IllegalBlockSizeException {
         return encrypt(password.toCharArray(), text.getBytes(StandardCharsets.UTF_8), keyLength);
+    }
+
+
+    /**
+     * An override of the encrypt method with the default AES key length set to be 256 bits.
+     *
+     * @param password The password used to encrypt the text.
+     * @param text The text to be encrypted using the advanced encryption standard.
+     *
+     * @return The bytes of encrypted text.
+     *
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeySpecException
+     * @throws NoSuchPaddingException
+     * @throws InvalidKeyException
+     * @throws InvalidParameterSpecException
+     * @throws BadPaddingException
+     * @throws IllegalBlockSizeException
+     */
+    public char[] encrypt(char[] password, byte[] text) throws NoSuchPaddingException, NoSuchAlgorithmException,
+            IllegalBlockSizeException, BadPaddingException, InvalidParameterSpecException, InvalidKeyException,
+            InvalidKeySpecException {
+        return encrypt(password, text, 256);
     }
 
 
@@ -248,10 +272,11 @@ public class AESWorker {
 
     /**
      * An override of the decrypt method with the ability to provide the password and encryptedText as character
-     * arrays, and attempt to extract the latest ivBytes and salt for usage. The Default AES Key length is 256-bits.
+     * arrays, and attempt to extract the latest ivBytes and salt for usage.
      *
      * @param password The plaintext password as a char array.
      * @param encryptedText The encrypted text as a char array.
+     * @param keyLength  The AES Key Length in bits.
      *
      * @return The decrypted byte array of the encrypted text.
      *
@@ -264,7 +289,7 @@ public class AESWorker {
      * @throws InvalidKeyException
      * @throws InvalidKeySpecException
      */
-    public byte[] decrypt(char[] password, char[] encryptedText) throws NoSuchPaddingException, DecoderException,
+    public byte[] decrypt(char[] password, char[] encryptedText, int keyLength) throws NoSuchPaddingException, DecoderException,
             InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException,
             BadPaddingException, InvalidKeyException, InvalidKeySpecException {
         byte[] ivBytes = getLatestIvAutoDestroy();
@@ -280,17 +305,18 @@ public class AESWorker {
             return null;
         }
 
-        return decrypt(password, encryptedText, salt, ivBytes, 256);
+        return decrypt(password, encryptedText, salt, ivBytes, keyLength);
     }
 
 
 
     /**
      * An override of the decrypt method with the ability to provide the password and encryptedText as String objects,
-     * and attempt to extract the latest ivBytes and salt for usage. The Default AES Key length is 256-bits.
+     * and attempt to extract the latest ivBytes and salt for usage.
      *
      * @param password The plaintext password as a char array.
      * @param encryptedText The encrypted text as a char array.
+     * @param keyLength The AES Key length in bits.
      *
      * @return The decrypted byte array of the encrypted text.
      *
@@ -303,23 +329,62 @@ public class AESWorker {
      * @throws InvalidKeyException
      * @throws InvalidKeySpecException
      */
-    public byte[] decrypt(String password, String encryptedText) throws NoSuchPaddingException, DecoderException,
+    public byte[] decrypt(String password, String encryptedText, int keyLength) throws NoSuchPaddingException, DecoderException,
             InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException,
             BadPaddingException, InvalidKeyException, InvalidKeySpecException {
-        byte[] ivBytes = getLatestIvAutoDestroy();
-        byte[] salt = getLatestSaltAutoDestroy();
+        return decrypt(password.toCharArray(), encryptedText.toCharArray(), keyLength);
+    }
 
-        if (ivBytes == null) {
-            System.err.println("Attempted to decrypt text with null Iv Bytes, returning null...");
-            return null;
-        }
 
-        if (salt == null) {
-            System.err.println("Attempted to decrypt text with null salt bytes, returning null...");
-            return null;
-        }
+    /**
+     * An override of the decrypt method with the ability to provide the password and encryptedText as character
+     * arrays, and attempt to extract the latest ivBytes and salt for usage. The Default AES Key length is set to
+     * 256 bits.
+     *
+     * @param password The plaintext password as a char array.
+     * @param encryptedText The encrypted text as a char array.
+     *
+     * @return The decrypted byte array of the encrypted text.
+     *
+     * @throws NoSuchPaddingException
+     * @throws InvalidKeyException
+     * @throws DecoderException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidAlgorithmParameterException
+     * @throws InvalidKeySpecException
+     */
+    public byte[] decrypt(char[] password, char[] encryptedText) throws NoSuchPaddingException, InvalidKeyException,
+            DecoderException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException,
+            InvalidAlgorithmParameterException, InvalidKeySpecException {
+        return decrypt(password, encryptedText, 256);
+    }
 
-        return decrypt(password.toCharArray(), encryptedText.toCharArray(), salt, ivBytes, 256);
+
+    /**
+     * An override of the decrypt method with the ability to provide the password and encryptedText as String
+     * objects, and attempt to extract the latest ivBytes and salt for usage. The Default AES Key length is set to
+     * 256 bits.
+     *
+     * @param password The plaintext password as a String object.
+     * @param encryptedText The encrypted text as a String object.
+     *
+     * @return The decrypted byte array of the encrypted text.
+     *
+     * @throws NoSuchPaddingException
+     * @throws InvalidKeyException
+     * @throws DecoderException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidAlgorithmParameterException
+     * @throws InvalidKeySpecException
+     */
+    public byte[] decrypt(String password, String encryptedText) throws NoSuchPaddingException,
+            InvalidAlgorithmParameterException, DecoderException, IllegalBlockSizeException, BadPaddingException,
+            NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
+        return decrypt(password.toCharArray(), encryptedText.toCharArray());
     }
 
 
