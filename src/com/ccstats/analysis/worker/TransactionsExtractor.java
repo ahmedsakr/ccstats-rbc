@@ -144,7 +144,11 @@ public class TransactionsExtractor {
     private void extractTransactions(Document doc) throws IOException {
         Elements tables = doc.select("table");
 
-        if (tables.size() == 2) {
+        if (tables.size() == 1) {
+            this.authorized = null;
+            this.posted = null;
+            this.transactions = null;
+        } else if (tables.size() == 2) {
             Element posted = tables.get(POSTED_TRANSACTIONS - 1);
 
             this.authorized = null;
@@ -163,7 +167,6 @@ public class TransactionsExtractor {
             this.transactions.addAll(this.authorized);
             this.transactions.addAll(this.posted);
         }
-
     }
 
 
