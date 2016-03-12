@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ahmedsakr.ccstats</groupId>
     <artifactId>ccstats-rbc</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.0</version>
     <packaging>jar</packaging>
 
     <name>ccstats-rbc by Ahmed Sakr</name>
@@ -77,32 +77,6 @@
     <build>
         <plugins>
 
-            <!-- updates the license -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>first</id>
-                        <goals>
-                            <goal>update-file-header</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                        <configuration>
-                            <encoding>UTF-8</encoding>
-                            <licenseName>Apache 2.0 GNU</licenseName>
-                            <inceptionYear>2015</inceptionYear>
-                            <organizationName>Ahmed Sakr</organizationName>
-                            <projectName>ccstats-rbc by Ahmed Sakr</projectName>
-                            <includes>
-                                <include>**/*.java</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!-- forces the maven project to compile and build at the source level of 1.8 (java 8) -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -111,59 +85,6 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
-            </plugin>
-
-            <!-- Creates the source jar with all the compiled files -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
-                <executions>
-                    <execution>
-                        <id>sources-jar</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Deploys the maven branch -->
-            <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.1</version>
-                <configuration>
-                    <altDeploymentRepository>internal.repo::default::file://${project.build.directory}/maven-repo</altDeploymentRepository>
-                </configuration>
-            </plugin>
-
-            <!-- Uploads needed files to /maven-repo -->
-            <plugin>
-                <groupId>com.github.github</groupId>
-                <artifactId>site-maven-plugin</artifactId>
-                <version>0.11</version>
-
-                <executions>
-                    <execution>
-                        <id>deploy-maven-repository</id>
-                        <configuration>
-                            <message>Maven for {project.version}</message>
-                            <merge>true</merge>
-                            <noJekyll>true</noJekyll>
-                            <outputDirectory>${project.build.directory}/maven-repo</outputDirectory>
-                            <branch>refs/heads/maven-repo</branch>
-                            <includes>
-                                <include>**/*</include>
-                            </includes>
-                            <repositoryName>ccstats-rbc</repositoryName>
-                            <repositoryOwner>ahmedsakr</repositoryOwner>
-                        </configuration>
-                        <goals>
-                            <goal>site</goal>
-                        </goals>
-                        <phase>deploy</phase>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

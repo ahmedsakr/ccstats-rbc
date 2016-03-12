@@ -18,6 +18,7 @@ $RECYCLE.BIN/
 /lib/
 *.class
 *.iml
+pom.xml
 
 # Windows shortcuts
 *.lnk

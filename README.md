@@ -1,7 +1,5 @@
-**Dependencies**: Jsoup-1.8.3, commons-codec-1.10, json-simple-1.1.1
-
 ccstats-rbc
-=====
+===========
 ---
 
 **ccstats-rbc** is a library that grants the user useful statistics for their credit statement,
@@ -14,38 +12,39 @@ Installing
 =====
 ---
 
-**Option #1**:
+Head over to the [release](https://github.com/ahmedsakr/ccstats-rbc/releases) section and download the latest jar.
+If you wish to import the dependencies using maven, add the following to your `pom.xml`:
 
-if you wish to download the project as a jar, then head over to the [release](https://github.com/ahmedsakr/ccstats-rbc/releases) section and download the latest jar.
-
-**Option #2**:
-
-
-You may also install this repository and all its dependencies using maven, just add the following to your `pom.xml` file:
 ```xml
 <project>
     <!-- your other settings -->
 
-    <repositories>
-        <repository>
-            <id>ccstats-rbc-maven</id>
-            <url>https://raw.githubusercontent.com/ahmedsakr/ccstats-rbc/maven-repo/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
-
+    <!-- dependencies for this project-->
     <dependencies>
         <dependency>
-            <groupId>com.ahmedsakr.ccstats</groupId>
-            <artifactId>ccstats-rbc</artifactId>
-            <version>[0.1.0,1.0.0)</version>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.8.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
         </dependency>
     </dependencies>
 </project>
 ```
+
+Otherwise, you will have to manually download the libraries and import them to your project.
+**Dependencies**: Jsoup-1.8.3, commons-codec-1.10, json-simple-1.1.1
+
 
 Example
 =====
@@ -94,7 +93,7 @@ Please consider installing **v0.1.43** or later.
 **WARNING**: Release **0.1.35** has been detected to fail at collecting transactions correctly. A critical update
 has been applied and is now effective as of **0.1.40**.
 
-**Latest build**: v[0.1.52](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.52)
+**Latest build**: v[0.2.0](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.2.0)
 
 License
 ====
