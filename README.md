@@ -28,8 +28,8 @@ You may also install this repository and all its dependencides using maven, just
 
     <repositories>
         <repository>
-            <id>ccstats-rbc-mvn-repo</id>
-            <url>https://raw.githubusercontent.com/ahmedsakr/ccstats-rbc/mvn-repo/</url>
+            <id>ccstats-rbc-maven</id>
+            <url>https://raw.githubusercontent.com/ahmedsakr/ccstats-rbc/maven/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
