@@ -21,7 +21,7 @@ if you wish to download the project as a jar, then head over to the [release](ht
 **Option #2**:
 
 
-You may also install this repository and all its dependencides using maven, just add the following to your `pom.xml` file:
+You may also install this repository and all its dependencies using maven, just add the following to your `pom.xml` file:
 ```xml
 <project>
     <!-- your other settings -->
@@ -29,7 +29,7 @@ You may also install this repository and all its dependencides using maven, just
     <repositories>
         <repository>
             <id>ccstats-rbc-maven</id>
-            <url>https://raw.githubusercontent.com/ahmedsakr/ccstats-rbc/maven/</url>
+            <url>https://raw.githubusercontent.com/ahmedsakr/ccstats-rbc/maven-repo/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
