@@ -1,4 +1,4 @@
-**Dependencies**: Jsoup-1.8.3, commons-codec-1.10, json-simple-1.11
+**Dependencies**: Jsoup-1.8.3, commons-codec-1.10, json-simple-1.1.1
 
 ccstats-rbc
 =====
@@ -8,6 +8,44 @@ ccstats-rbc
 such as amount of transactions, actual total debit and credit grants, etc. **ccstats-rbc** is meant to be a flexible library and have several ways to integrate to environments. As of this revision, **ccstats-rbc** supports the ability to deliver the HTML data through the critical mediums: String input (useful for browser support) and .html/.htm files.
 
 **ccstats-rbc** extracts all transactions and wraps them in very-well structured objects with several statistical methods pre-programmed in the library. Encrypting statements, Statement comparison, and more are to be programmed and integrated in the near future.
+
+
+Installing
+=====
+---
+
+**Option #1**:
+
+if you wish to download the project as a jar, then head over to the [release](https://github.com/ahmedsakr/ccstats-rbc/releases) section and download the latest jar.
+
+**Option #2**:
+
+
+You may also install this repository and all its dependencides using maven, just add the following to your `pom.xml` file:
+```xml
+<project>
+    <!-- your other settings -->
+
+    <repositories>
+        <repository>
+            <id>ccstats-rbc-mvn-repo</id>
+            <url>https://raw.githubusercontent.com/ahmedsakr/ccstats-rbc/mvn-repo/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ahmedsakr.ccstats</groupId>
+            <artifactId>ccstats-rbc</artifactId>
+            <version>[0.1.0,1.0.0)</version>
+        </dependency>
+    </dependencies>
+</project>
+```
 
 Example
 =====
@@ -56,7 +94,7 @@ Please consider installing **v0.1.43** or later.
 **WARNING**: Release **0.1.35** has been detected to fail at collecting transactions correctly. A critical update
 has been applied and is now effective as of **0.1.40**.
 
-**Latest build**: v[0.1.43](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.43)
+**Latest build**: v[0.1.52](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.1.52)
 
 License
 ====

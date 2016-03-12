@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.ahmedsakr.ccstats</groupId>
+    <artifactId>ccstats-rbc</artifactId>
+    <version>0.1.52-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>ccstats-rbc by Ahmed Sakr</name>
+    <url>https://github.com/ahmedsakr/ccstats-rbc</url>
+    <description>A statistical library specifically for RBC RoyalBank of Canada customers.</description>
+
+    <licenses>
+        <license>
+            <name>Apache 2.0 GNU</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Ahmed Sakr</name>
+            <email>ahmad.sakr1997@hotmail.com</email>
+            <url>https://github.com/ahmedsakr</url>
+        </developer>
+    </developers>
+
+    <properties>
+        <encoding>UTF-8</encoding>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <snapshotBuild>false</snapshotBuild>
+            </properties>
+        </profile>
+        <profile>
+            <id>snapshot</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <snapshotBuild>true</snapshotBuild>
+            </properties>
+        </profile>
+    </profiles>
+
+    <!-- dependencies for this project-->
+    <dependencies>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.8.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+    </dependencies>
+</project>
