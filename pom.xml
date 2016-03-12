@@ -77,7 +77,33 @@
     <build>
         <plugins>
 
-            <!-- forces the maven project to compile and build at the source level of 1.8 (java () -->
+            <!-- updates the license -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>first</id>
+                        <goals>
+                            <goal>update-file-header</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                        <configuration>
+                            <encoding>UTF-8</encoding>
+                            <licenseName>Apache 2.0 GNU</licenseName>
+                            <inceptionYear>2015</inceptionYear>
+                            <organizationName>Ahmed Sakr</organizationName>
+                            <projectName>ccstats-rbc by Ahmed Sakr</projectName>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- forces the maven project to compile and build at the source level of 1.8 (java 8) -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
@@ -85,6 +111,21 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+
+            <!-- Creates the source jar with all the compiled files -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>sources-jar</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Deploys the maven branch -->
