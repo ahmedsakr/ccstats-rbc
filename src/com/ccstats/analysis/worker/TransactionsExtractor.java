@@ -143,15 +143,26 @@ public class TransactionsExtractor {
      */
     private void extractTransactions(Document doc) throws IOException {
         Elements tables = doc.select("table");
-        Element authorized = tables.get(AUTHORIZED_TRANSACTIONS);
-        Element posted = tables.get(POSTED_TRANSACTIONS);
 
-        this.authorized = extractTransactions(authorized, "authorized");
-        this.posted = extractTransactions(posted, "posted");
+        if (tables.size() == 2) {
+            Element posted = tables.get(POSTED_TRANSACTIONS - 1);
 
-        this.transactions = new TransactionPool();
-        this.transactions.addAll(this.authorized);
-        this.transactions.addAll(this.posted);
+            this.authorized = null;
+            this.posted = extractTransactions(posted, "posted");
+
+            this.transactions = new TransactionPool();
+            this.transactions.addAll(this.posted);
+        } else if (tables.size() == 3) {
+            Element authorized = tables.get(AUTHORIZED_TRANSACTIONS);
+            Element posted = tables.get(POSTED_TRANSACTIONS);
+
+            this.authorized = extractTransactions(authorized, "authorized");
+            this.posted = extractTransactions(posted, "posted");
+
+            this.transactions = new TransactionPool();
+            this.transactions.addAll(this.authorized);
+            this.transactions.addAll(this.posted);
+        }
 
     }
 

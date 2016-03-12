@@ -37,6 +37,7 @@ import java.security.spec.InvalidParameterSpecException;
  */
 public class AESWorker {
 
+    private boolean keyBitLengthWarned;
 
     /**
      * Through the power of the advanced encryption standard, a plaintext will be encrypted with a parameter-specified
@@ -75,8 +76,11 @@ public class AESWorker {
         int maxKeyLength = Cipher.getMaxAllowedKeyLength("AES");
         if (maxKeyLength < keyLength) {
             keyLength = maxKeyLength;
-            System.err.printf("WARNING: YOUR MAXIMUM AES KEY LENGTH POLICY IS %d BITS. KEY LENGTH LIMITED TO %d BITS.\n",
-                    maxKeyLength, maxKeyLength);
+            if (!keyBitLengthWarned) {
+                System.err.printf("WARNING: YOUR MAXIMUM AES KEY LENGTH POLICY IS %d BITS. KEY LENGTH LIMITED TO %d BITS.\n",
+                        maxKeyLength, maxKeyLength);
+            }
+            keyBitLengthWarned = true;
         }
 
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
@@ -183,9 +187,9 @@ public class AESWorker {
      * @throws InvalidAlgorithmParameterException
      * @throws DecoderException
      */
-    public byte[] decrypt(char[] password, char[] encryptedBlock, int keyLength) throws
-            NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException,
-            BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException, DecoderException {
+    public byte[] decrypt(char[] password, char[] encryptedBlock, int keyLength) throws NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException, BadPaddingException,
+            IllegalBlockSizeException, InvalidAlgorithmParameterException, DecoderException {
 
         password = hash(new String(password).getBytes(StandardCharsets.UTF_8));
         byte[] decoded = Hex.decodeHex(encryptedBlock);
@@ -211,8 +215,11 @@ public class AESWorker {
 
         if (maxKeyLength < keyLength) {
             keyLength = maxKeyLength;
-            System.err.printf("WARNING: YOUR MAXIMUM AES KEY LENGTH POLICY IS %d BITS. KEY LENGTH LIMITED TO %d BITS.\n",
-                    maxKeyLength, maxKeyLength);
+            if (!keyBitLengthWarned) {
+                System.err.printf("WARNING: YOUR MAXIMUM AES KEY LENGTH POLICY IS %d BITS. KEY LENGTH LIMITED TO %d BITS.\n",
+                        maxKeyLength, maxKeyLength);
+            }
+            keyBitLengthWarned = true;
         }
 
         SecretKeyFactory factory = SecretKeyFactory .getInstance("PBKDF2WithHmacSHA1");
@@ -244,9 +251,9 @@ public class AESWorker {
      * @throws InvalidKeyException
      * @throws InvalidKeySpecException
      */
-    public byte[] decrypt(String password, String encryptedText, int keyLength) throws
-            NoSuchPaddingException, DecoderException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
-            IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InvalidKeySpecException {
+    public byte[] decrypt(String password, String encryptedText, int keyLength) throws NoSuchPaddingException,
+            DecoderException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException,
+            BadPaddingException, InvalidKeyException, InvalidKeySpecException {
         return decrypt(password.toCharArray(), encryptedText.toCharArray(), keyLength);
     }
 
@@ -269,9 +276,9 @@ public class AESWorker {
      * @throws InvalidKeyException
      * @throws InvalidKeySpecException
      */
-    public byte[] decrypt(String password, String encryptedText) throws
-            NoSuchPaddingException, DecoderException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
-            IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InvalidKeySpecException {
+    public byte[] decrypt(String password, String encryptedText) throws NoSuchPaddingException, DecoderException,
+            InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException,
+            BadPaddingException, InvalidKeyException, InvalidKeySpecException {
         return decrypt(password.toCharArray(), encryptedText.toCharArray(), 256);
     }
 
@@ -319,6 +326,12 @@ public class AESWorker {
     }
 
 
+    /**
+     * Merges all the byte[] varargs.
+     *
+     * @param arrays The byte[] varargs
+     * @return The master byte[] containing all the byte arrays.
+     */
     private byte[] mergeByteArrays(byte[]... arrays) {
         int capacity = 0;
         for (byte[] arr : arrays) {
