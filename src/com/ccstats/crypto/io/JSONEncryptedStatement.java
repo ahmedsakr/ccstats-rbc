@@ -118,7 +118,7 @@ public class JSONEncryptedStatement {
 
             if (statement.getPostedTransactions() != null) {
                 for (int i = 0; i < statement.getPostedTransactions().size(); i++) {
-                    transaction = statement.getAuthorizedTransactions().get(i);
+                    transaction = statement.getPostedTransactions().get(i);
                     transactionObj = new JSONObject();
 
                     date = new String(worker.encrypt(password, transaction.getDate().toString()));
