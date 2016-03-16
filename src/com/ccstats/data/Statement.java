@@ -48,6 +48,21 @@ public class Statement extends TransactionPool {
 
 
     /**
+     * Constructor for the statement class. Initializes the class without requiring extraction.
+     *
+     * @param authorized The authorized transactions pool.
+     * @param posted The posted transactions pool.
+     */
+    public Statement(TransactionPool authorized, TransactionPool posted) {
+        this.authorized = authorized;
+        this.posted = posted;
+
+        this.addAll(authorized);
+        this.addAll(posted);
+    }
+
+
+    /**
      * @return The TransactionPool object of the authorized transactions.
      */
     public TransactionPool getAuthorizedTransactions() {

@@ -44,19 +44,13 @@ public class Transaction {
      * @param description The Description of the transaction.
      * @param date The date the transaction has been recorded.
      * @param amount The amount due from the transaction.
-     * @param debit The type of the transaction (Debit/Credit)
      * @param authorized The transaction's current status (authorized or posted)
      */
-    public Transaction(String description, LocalDate date, double amount, boolean debit, boolean authorized) {
+    public Transaction(String description, LocalDate date, double amount,  boolean authorized) {
         this.description = description.trim();
         this.date = date;
+        this.amount = amount;
         this.authorized = authorized;
-
-        if (debit) {
-            this.amount = amount;
-        } else {
-            this.amount = - amount;
-        }
     }
 
 

@@ -212,11 +212,10 @@ public class TransactionsExtractor {
                  * In order to get the amount, the inner class that makes the text green must be
                  * accessed and its value taken.
                  */
-                amount = Double.valueOf(credit.html().trim().replace(",", "").replace("$", ""));
+                amount = - Double.valueOf(credit.html().trim().replace(",", "").replace("$", ""));
             }
 
-            transactions.add(new Transaction(description, date, amount,
-                    debit.children().size() == 0 && !debit.html().isEmpty(), type.equals("authorized")));
+            transactions.add(new Transaction(description, date, amount, type.equals("authorized")));
         }
 
         return transactions;

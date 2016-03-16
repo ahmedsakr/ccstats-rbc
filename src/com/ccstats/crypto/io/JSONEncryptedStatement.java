@@ -17,21 +17,30 @@
 package com.ccstats.crypto.io;
 
 
+import com.ccstats.analysis.TransactionPool;
 import com.ccstats.crypto.AESWorker;
 import com.ccstats.data.Statement;
 import com.ccstats.data.Transaction;
+import org.apache.commons.codec.DecoderException;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Iterator;
 
 
 /**
@@ -42,6 +51,7 @@ import java.security.spec.InvalidParameterSpecException;
 public class JSONEncryptedStatement {
 
     private Statement statement;
+    private AESWorker worker;
 
 
     /**
@@ -49,7 +59,7 @@ public class JSONEncryptedStatement {
      * the object is being constructed for reading purposes.
      */
     public JSONEncryptedStatement() {
-
+        worker = new AESWorker();
     }
 
 
@@ -60,6 +70,7 @@ public class JSONEncryptedStatement {
      * @param statement The Serialized statement object.
      */
     public JSONEncryptedStatement(Statement statement) {
+        this();
         this.statement = statement;
     }
 
@@ -78,8 +89,7 @@ public class JSONEncryptedStatement {
      * Encrypts and writes all the data from the plain serialized statement to a .json file.
      *
      * @param absolutePath The absolute path of the .json output file. (including the file name)
-     * @param password The plaintext password to be used for encrypting the data.
-     *
+     * @param password     The plaintext password to be used for encrypting the data.
      * @throws IOException
      */
     public void write(String absolutePath, String password) throws IOException {
@@ -88,12 +98,11 @@ public class JSONEncryptedStatement {
             return;
         }
 
-        AESWorker worker = new AESWorker();
         JSONObject main = new JSONObject();
         JSONObject authorizedTransactions = new JSONObject(), postedTransactions = new JSONObject();
 
         try {
-            String date, description, amount, type;
+            String date, description, amount;
             JSONObject transactionObj;
             Transaction transaction;
 
@@ -105,12 +114,10 @@ public class JSONEncryptedStatement {
                     date = new String(worker.encrypt(password, transaction.getDate().toString()));
                     description = new String(worker.encrypt(password, transaction.getDescription()));
                     amount = new String(worker.encrypt(password, String.valueOf(transaction.getAmount())));
-                    type = new String(worker.encrypt(password, transaction.getDate().toString()));
 
                     transactionObj.put("date", date);
                     transactionObj.put("description", description);
                     transactionObj.put("amount", amount);
-                    transactionObj.put("type", type);
 
                     authorizedTransactions.put(String.format("transaction-%d", i + 1), transactionObj);
                 }
@@ -124,12 +131,10 @@ public class JSONEncryptedStatement {
                     date = new String(worker.encrypt(password, transaction.getDate().toString()));
                     description = new String(worker.encrypt(password, transaction.getDescription()));
                     amount = new String(worker.encrypt(password, String.valueOf(transaction.getAmount())));
-                    type = new String(worker.encrypt(password, transaction.getDate().toString()));
 
                     transactionObj.put("date", date);
                     transactionObj.put("description", description);
                     transactionObj.put("amount", amount);
-                    transactionObj.put("type", type);
 
                     postedTransactions.put(String.format("transaction-%d", i + 1), transactionObj);
                 }
@@ -152,8 +157,7 @@ public class JSONEncryptedStatement {
      * An override of the original write method with a char array password instead of a String object.
      *
      * @param absolutePath The absolute path of the .json output file. (including the file name)
-     * @param password The plaintext password to be used for encrypting the data.
-     *
+     * @param password     The plaintext password to be used for encrypting the data.
      * @throws IOException
      */
     public void write(String absolutePath, char[] password) throws IOException {
@@ -165,10 +169,9 @@ public class JSONEncryptedStatement {
      * An override of the original write method with the option to provide the filename and the absolute parent path
      * as different parameters as needed.
      *
-     * @param filename The .json file name.
+     * @param filename           The .json file name.
      * @param absoluteParentPath The absolute path of the parent folder that will hold the .json file.
-     * @param password The plaintext password to be used for encrypting the data.
-     *
+     * @param password           The plaintext password to be used for encrypting the data.
      * @throws IOException
      */
     public void write(String filename, String absoluteParentPath, char[] password) throws IOException {
@@ -176,19 +179,129 @@ public class JSONEncryptedStatement {
     }
 
 
-
     /**
      * An override of the original write method with the option to provide the filename and the absolute parent path
      * as different parameters as needed. The password is also a String object instead of the accustomed char
      * array.
      *
-     * @param filename The .json file name.
+     * @param filename           The .json file name.
      * @param absoluteParentPath The absolute path of the parent folder that will hold the .json file.
-     * @param password The plaintext password to be used for encrypting the data.
-     *
+     * @param password           The plaintext password to be used for encrypting the data.
      * @throws IOException
      */
     public void write(String filename, String absoluteParentPath, String password) throws IOException {
         write(absoluteParentPath + "\\" + filename, password);
+    }
+
+
+    /**
+     * Reads an encrypted .json statement file and attempts to decrypt it. Once decrypted, the transactions can be
+     * pooled and returned as a joint statement.
+     *
+     * @param absolutePath The absolute path to the encrypted statement, including the file name.
+     * @param password The password sequence to be used while attempting the decryption.
+     *
+     * @return A statement object containing all the discovered transactions as a pool.
+     *
+     * @throws IOException
+     * @throws ParseException
+     * @throws BadPaddingException
+     */
+    public Statement read(String absolutePath, String password) throws IOException, ParseException, BadPaddingException {
+        TransactionPool authorized = new TransactionPool(), posted = new TransactionPool();
+        JSONParser parser = new JSONParser();
+
+        JSONObject main = (JSONObject) parser.parse(new FileReader(absolutePath));
+        JSONObject encryptedAuthorizedTransactions = (JSONObject) main.get("authorized_transactions");
+        JSONObject encryptedPostedTransactions = (JSONObject) main.get("posted_transactions");
+
+        try {
+
+            JSONObject current;
+            String date, description, amount;
+            Iterator iterator = encryptedAuthorizedTransactions.values().iterator();
+            while (iterator.hasNext()) {
+                current = (JSONObject) iterator.next();
+                date = new String(worker.decrypt(password, (String) current.get("date")));
+                description = new String(worker.decrypt(password, (String) current.get("description")));
+                amount = new String(worker.decrypt(password, (String) current.get("amount")));
+
+                authorized.add(new Transaction(description, LocalDate.parse(date), Double.valueOf(amount), true));
+            }
+
+            iterator = encryptedPostedTransactions.values().iterator();
+            while (iterator.hasNext()) {
+                current = (JSONObject) iterator.next();
+                date = new String(worker.decrypt(password, (String) current.get("date")));
+                description = new String(worker.decrypt(password, (String) current.get("description")));
+                amount = new String(worker.decrypt(password, (String) current.get("amount")));
+
+                posted.add(new Transaction(description, LocalDate.parse(date), Double.valueOf(amount), false));
+            }
+
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException | DecoderException | InvalidKeyException |
+                InvalidAlgorithmParameterException | IllegalBlockSizeException | NoSuchPaddingException e) {
+            e.printStackTrace();
+        }
+
+
+        return new Statement(authorized, posted);
+    }
+
+
+    /**
+     * An override to the write method with the minor change of allowing the password to be given as a char
+     * array.
+     *
+     * @param absolutePath The absolute path to the encrypted statement, including the file name.
+     * @param password The password sequence to be used while attempting the decryption.
+     *
+     * @return A statement object containing all the discovered transactions as a pool.
+     *
+     * @throws IOException
+     * @throws ParseException
+     * @throws BadPaddingException
+     */
+    public Statement read(String absolutePath, char[] password) throws ParseException, BadPaddingException, IOException {
+        return read(absolutePath, new String(password));
+    }
+
+
+    /**
+     * An override to the write method with the following changes: allowing the filename and absolute parent path
+     * to be input separately, and the password as a char array.
+     *
+     * @param fileName the alias of the encrypted statement.
+     * @param absoluteParentPath The absolute path to the encrypted statement's parent folder.
+     * @param password The password sequence to be used while attempting the decryption.
+     *
+     * @return A statement object containing all the discovered transactions as a pool.
+     *
+     * @throws IOException
+     * @throws ParseException
+     * @throws BadPaddingException
+     */
+    public Statement read(String fileName, String absoluteParentPath, char[] password) throws ParseException,
+            BadPaddingException, IOException {
+        return read(absoluteParentPath + "\\" + fileName, password);
+    }
+
+
+    /**
+     * An override to the write method with the minor change of allowing the password to be a String object.
+     *
+     * @param fileName the alias of the encrypted statement.
+     * @param absoluteParentPath The absolute path to the encrypted statement's parent folder.
+     * @param password The password sequence to be used while attempting the decryption.
+     *
+     * @return A statement object containing all the discovered transactions as a pool.
+     *
+     * @throws IOException
+     * @throws ParseException
+     * @throws BadPaddingException
+     */
+    public Statement read(String fileName, String absoluteParentPath, String password) throws ParseException,
+            BadPaddingException, IOException {
+        return read(absoluteParentPath + "\\" + fileName, password);
     }
 }
