@@ -116,16 +116,16 @@ public class Transaction {
      */
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof Transaction)) {
+        if (other == null || !(other instanceof Transaction)) {
             return false;
-        } else if (other != this) {
+        } else if (other == this) {
+            return true;
+        } else {
             Transaction transaction = (Transaction) other;
             boolean equalAmount = this.getAmount() == transaction.getAmount();
             boolean equalName = this.getDescription().equals(transaction.getDescription());
             return equalAmount && equalName;
         }
-
-        return super.equals(other);
     }
 
 }

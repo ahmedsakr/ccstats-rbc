@@ -30,35 +30,18 @@ import com.ccstats.analysis.worker.TransactionsExtractor;
 public class Statement extends TransactionPool {
 
 
-    private TransactionPool authorized, posted;
-
-
-    /**
-     * Constructor for Statement. Calls the super method of the statistics class.
-     * Moreover, assigns new statistics objects for the authorized and posted transactions.
-     *
-     * @param extractor The Transactions extractor.
-     */
     public Statement(TransactionsExtractor extractor) {
-        super(extractor.getTransactions());
-
-        this.authorized = extractor.getAuthorizedTransactions();
-        this.posted = extractor.getPostedTransactions();
+        this(extractor.getTransactions());
     }
 
 
     /**
-     * Constructor for the statement class. Initializes the class without requiring extraction.
+     * Constructor for Statement. Calls the super method of the statistics class.
      *
-     * @param authorized The authorized transactions pool.
-     * @param posted The posted transactions pool.
+     * @param transactions The Transactions
      */
-    public Statement(TransactionPool authorized, TransactionPool posted) {
-        this.authorized = authorized;
-        this.posted = posted;
-
-        this.addAll(authorized);
-        this.addAll(posted);
+    public Statement(TransactionPool transactions) {
+        super(transactions);
     }
 
 
@@ -66,6 +49,8 @@ public class Statement extends TransactionPool {
      * @return The TransactionPool object of the authorized transactions.
      */
     public TransactionPool getAuthorizedTransactions() {
+        TransactionPool authorized = new TransactionPool();
+        this.stream().filter(t -> t.isAuthorized()).forEach(authorized::add);
         return authorized;
     }
 
@@ -74,6 +59,8 @@ public class Statement extends TransactionPool {
      * @return The TransactionPool object of the posted transactions.
      */
     public TransactionPool getPostedTransactions() {
+        TransactionPool posted = new TransactionPool();
+        this.stream().filter(t -> !t.isAuthorized()).forEach(posted::add);
         return posted;
     }
 

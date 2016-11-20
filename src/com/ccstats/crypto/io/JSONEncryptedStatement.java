@@ -39,8 +39,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Iterator;
 
 
 /**
@@ -90,7 +88,6 @@ public class JSONEncryptedStatement {
      *
      * @param absolutePath The absolute path of the .json output file. (including the file name)
      * @param password     The plaintext password to be used for encrypting the data.
-     * @throws IOException
      */
     public void write(String absolutePath, String password) throws IOException {
 
@@ -99,44 +96,29 @@ public class JSONEncryptedStatement {
         }
 
         JSONObject main = new JSONObject();
-        JSONObject authorizedTransactions = new JSONObject(), postedTransactions = new JSONObject();
+        JSONObject transactions = new JSONObject();
 
         try {
-            String date, description, amount;
+            String date, description, amount, authorized;
             JSONObject transactionObj;
             Transaction transaction;
 
-            if (statement.getAuthorizedTransactions() != null) {
-                for (int i = 0; i < statement.getAuthorizedTransactions().size(); i++) {
-                    transaction = statement.getAuthorizedTransactions().get(i);
+            if (statement != null && !statement.isEmpty()) {
+                for (int i = 0; i < statement.size(); i++) {
+                    transaction = statement.get(i);
                     transactionObj = new JSONObject();
 
                     date = new String(worker.encrypt(password, transaction.getDate().toString()));
                     description = new String(worker.encrypt(password, transaction.getDescription()));
                     amount = new String(worker.encrypt(password, String.valueOf(transaction.getAmount())));
+                    authorized = new String(worker.encrypt(password, String.valueOf(transaction.isAuthorized())));
 
                     transactionObj.put("date", date);
                     transactionObj.put("description", description);
                     transactionObj.put("amount", amount);
+                    transactionObj.put("authorized", authorized);
 
-                    authorizedTransactions.put(String.format("transaction-%d", i + 1), transactionObj);
-                }
-            }
-
-            if (statement.getPostedTransactions() != null) {
-                for (int i = 0; i < statement.getPostedTransactions().size(); i++) {
-                    transaction = statement.getPostedTransactions().get(i);
-                    transactionObj = new JSONObject();
-
-                    date = new String(worker.encrypt(password, transaction.getDate().toString()));
-                    description = new String(worker.encrypt(password, transaction.getDescription()));
-                    amount = new String(worker.encrypt(password, String.valueOf(transaction.getAmount())));
-
-                    transactionObj.put("date", date);
-                    transactionObj.put("description", description);
-                    transactionObj.put("amount", amount);
-
-                    postedTransactions.put(String.format("transaction-%d", i + 1), transactionObj);
+                    transactions.put(String.format("transaction-%d", i + 1), transactionObj);
                 }
             }
         } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException |
@@ -144,9 +126,7 @@ public class JSONEncryptedStatement {
             e.printStackTrace();
         }
 
-        main.put("authorized_transactions", authorizedTransactions);
-        main.put("posted_transactions", postedTransactions);
-
+        main.put("transactions", transactions);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(absolutePath, false))) {
             writer.write(main.toJSONString());
         }
@@ -158,7 +138,6 @@ public class JSONEncryptedStatement {
      *
      * @param absolutePath The absolute path of the .json output file. (including the file name)
      * @param password     The plaintext password to be used for encrypting the data.
-     * @throws IOException
      */
     public void write(String absolutePath, char[] password) throws IOException {
         write(absolutePath, new String(password));
@@ -172,7 +151,6 @@ public class JSONEncryptedStatement {
      * @param filename           The .json file name.
      * @param absoluteParentPath The absolute path of the parent folder that will hold the .json file.
      * @param password           The plaintext password to be used for encrypting the data.
-     * @throws IOException
      */
     public void write(String filename, String absoluteParentPath, char[] password) throws IOException {
         write(absoluteParentPath + "\\" + filename, password);
@@ -187,7 +165,6 @@ public class JSONEncryptedStatement {
      * @param filename           The .json file name.
      * @param absoluteParentPath The absolute path of the parent folder that will hold the .json file.
      * @param password           The plaintext password to be used for encrypting the data.
-     * @throws IOException
      */
     public void write(String filename, String absoluteParentPath, String password) throws IOException {
         write(absoluteParentPath + "\\" + filename, password);
@@ -202,41 +179,27 @@ public class JSONEncryptedStatement {
      * @param password The password sequence to be used while attempting the decryption.
      *
      * @return A statement object containing all the discovered transactions as a pool.
-     *
-     * @throws IOException
-     * @throws ParseException
-     * @throws BadPaddingException
      */
     public Statement read(String absolutePath, String password) throws IOException, ParseException, BadPaddingException {
-        TransactionPool authorized = new TransactionPool(), posted = new TransactionPool();
+        TransactionPool transactions = new TransactionPool();
         JSONParser parser = new JSONParser();
 
         JSONObject main = (JSONObject) parser.parse(new FileReader(absolutePath));
-        JSONObject encryptedAuthorizedTransactions = (JSONObject) main.get("authorized_transactions");
-        JSONObject encryptedPostedTransactions = (JSONObject) main.get("posted_transactions");
+        JSONObject encryptedTransactions = (JSONObject) main.get("transactions");
 
         try {
 
             JSONObject current;
-            String date, description, amount;
-            Iterator iterator = encryptedAuthorizedTransactions.values().iterator();
-            while (iterator.hasNext()) {
-                current = (JSONObject) iterator.next();
+            String date, description, amount, authorized;
+            for (Object o : encryptedTransactions.values()) {
+                current = (JSONObject) o;
                 date = new String(worker.decrypt(password, (String) current.get("date")));
                 description = new String(worker.decrypt(password, (String) current.get("description")));
                 amount = new String(worker.decrypt(password, (String) current.get("amount")));
+                authorized = new String(worker.decrypt(password, (String) current.get("authorized")));
 
-                authorized.add(new Transaction(description, LocalDate.parse(date), Double.valueOf(amount), true));
-            }
-
-            iterator = encryptedPostedTransactions.values().iterator();
-            while (iterator.hasNext()) {
-                current = (JSONObject) iterator.next();
-                date = new String(worker.decrypt(password, (String) current.get("date")));
-                description = new String(worker.decrypt(password, (String) current.get("description")));
-                amount = new String(worker.decrypt(password, (String) current.get("amount")));
-
-                posted.add(new Transaction(description, LocalDate.parse(date), Double.valueOf(amount), false));
+                transactions.add(new Transaction(description, LocalDate.parse(date), Double.valueOf(amount),
+                        Boolean.valueOf(authorized)));
             }
 
         } catch (InvalidKeySpecException | NoSuchAlgorithmException | DecoderException | InvalidKeyException |
@@ -245,7 +208,7 @@ public class JSONEncryptedStatement {
         }
 
 
-        return new Statement(authorized, posted);
+        return new Statement(transactions);
     }
 
 
@@ -257,10 +220,6 @@ public class JSONEncryptedStatement {
      * @param password The password sequence to be used while attempting the decryption.
      *
      * @return A statement object containing all the discovered transactions as a pool.
-     *
-     * @throws IOException
-     * @throws ParseException
-     * @throws BadPaddingException
      */
     public Statement read(String absolutePath, char[] password) throws ParseException, BadPaddingException, IOException {
         return read(absolutePath, new String(password));
@@ -276,10 +235,6 @@ public class JSONEncryptedStatement {
      * @param password The password sequence to be used while attempting the decryption.
      *
      * @return A statement object containing all the discovered transactions as a pool.
-     *
-     * @throws IOException
-     * @throws ParseException
-     * @throws BadPaddingException
      */
     public Statement read(String fileName, String absoluteParentPath, char[] password) throws ParseException,
             BadPaddingException, IOException {
@@ -295,10 +250,6 @@ public class JSONEncryptedStatement {
      * @param password The password sequence to be used while attempting the decryption.
      *
      * @return A statement object containing all the discovered transactions as a pool.
-     *
-     * @throws IOException
-     * @throws ParseException
-     * @throws BadPaddingException
      */
     public Statement read(String fileName, String absoluteParentPath, String password) throws ParseException,
             BadPaddingException, IOException {

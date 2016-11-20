@@ -25,7 +25,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 
 
 /**
@@ -44,15 +43,6 @@ public class TransactionPool extends ArrayList<Transaction> {
 
     }
 
-
-    /**
-     * Constructs a new TransactionPool object with only one transaction in the pool.
-     *
-     * @param transaction The Transaction to be added in the TransactionPool.
-     */
-    public TransactionPool(Transaction transaction) {
-        this.add(transaction);
-    }
 
     /**
      * Constructs a new TransactionPool object, and transfers all elements in the ArrayList to the object.
@@ -95,7 +85,7 @@ public class TransactionPool extends ArrayList<Transaction> {
     @Override
     public void add(int i, Transaction transaction) {
         super.add(i, transaction);
-        updateRecurringTransactions(transaction);
+        updateFrequency(transaction);
     }
 
 
@@ -289,7 +279,7 @@ public class TransactionPool extends ArrayList<Transaction> {
      *
      * @return The Average amount spent on a transaction.
      */
-    public double getAverageTransaction() {
+    public double getAverageTransactionAmount() {
         if (this.size() == 0) {
             return 0;
         }
@@ -444,7 +434,7 @@ public class TransactionPool extends ArrayList<Transaction> {
      * this pool compared to the average value.
      *
      * @return The Standard Deviation.
-     * @see this#getAverageTransaction()
+     * @see this#getAverageTransactionAmount()
      */
     public double getStandardDeviation() {
         if (this.size() == 0 || this.size() == 1) {
@@ -452,7 +442,7 @@ public class TransactionPool extends ArrayList<Transaction> {
         }
 
         double weightedSum = 0.0;
-        double averageTransaction = getAverageTransaction();
+        double averageTransaction = getAverageTransactionAmount();
 
         for (Transaction transaction : this) {
             weightedSum += Math.pow(transaction.getAmount() - averageTransaction, 2);
@@ -468,10 +458,8 @@ public class TransactionPool extends ArrayList<Transaction> {
      *
      * @param transaction The transaction to be inserted or updated in the recurring transactions HashMap.
      */
-    private void updateRecurringTransactions(Transaction transaction) {
-        Iterator<Transaction> iterator = frequencies.keySet().iterator();
-        while (iterator.hasNext()) {
-            Transaction transaction2 = iterator.next();
+    private void updateFrequency(Transaction transaction) {
+        for (Transaction transaction2 : frequencies.keySet()) {
             if (transaction.equals(transaction2)) {
                 frequencies.get(transaction2).increment();
                 return;
