@@ -38,16 +38,15 @@ import java.time.format.DateTimeFormatter;
  */
 public class TransactionsExtractor {
 
-    private TransactionPool authorized, posted, transactions;
+    private Document doc;
 
 
     /**
      * Final integers declaring the indices to be used when accessing the statement tables. Mainly
      * to avoid magic numbers that might cause confusion.
      */
-    private static final int AUTHORIZED_TRANSACTIONS = 1, POSTED_TRANSACTIONS = 2;
+    private static final int AUTHORIZED_TRANSACTIONS = 0, POSTED_TRANSACTIONS = 1;
     private static final int TRANSACTION_DESCRIPTION = 0, TRANSACTION_DEBIT_AMOUNT = 1, TRANSACTION_CREDIT_AMOUNT = 2;
-
 
     /**
      * Constructor for the TransactionsExtractor that requires the statement as a parameter.
@@ -55,12 +54,8 @@ public class TransactionsExtractor {
      *
      * @param statement The CreditStatement instance provided by the user.
      */
-    public TransactionsExtractor(CreditStatement statement) {
-        try {
-            extractTransactions(Jsoup.parse(new File(statement.getAbsolutePath()), "UTF-8"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public TransactionsExtractor(CreditStatement statement) throws IOException {
+        this.doc = Jsoup.parse(new File(statement.getAbsolutePath()), "UTF-8");
     }
 
 
@@ -71,12 +66,8 @@ public class TransactionsExtractor {
      * @param statement The CreditStatement Object.
      * @param baseUri   The Text Encoding.
      */
-    public TransactionsExtractor(CreditStatement statement, String baseUri) {
-        try {
-            extractTransactions(Jsoup.parse(new File(statement.getAbsolutePath()), baseUri));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public TransactionsExtractor(CreditStatement statement, String baseUri) throws IOException {
+        this.doc = Jsoup.parse(new File(statement.getAbsolutePath()), baseUri);
     }
 
 
@@ -86,11 +77,7 @@ public class TransactionsExtractor {
      * @param html The HTML text as a String object.
      */
     public TransactionsExtractor(String html) {
-        try {
-            extractTransactions(Jsoup.parse(html, "UTF-8"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.doc = Jsoup.parse(html, "UTF-8");
     }
 
 
@@ -102,84 +89,109 @@ public class TransactionsExtractor {
      * @param baseUri The Text Encoding.
      */
     public TransactionsExtractor(String html, String baseUri) {
-        try {
-            extractTransactions(Jsoup.parse(html, baseUri));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.doc = Jsoup.parse(html, baseUri);
     }
 
-
     /**
-     * @return A TransactionPool Object of All transactions. (authorized and posted)
-     */
-    public TransactionPool getTransactions() {
-        return transactions;
-    }
-
-
-    /**
-     * @return A TransactionPool Object of all the authorized transactions, each represented as a
-     * AuthorizedTransaction object.
-     */
-    public TransactionPool getAuthorizedTransactions() {
-        return authorized;
-    }
-
-
-    /**
-     * @return A TransactionPool Object of all the posted transactions, each represented as a
-     * PostedTransaction object.
-     */
-    public TransactionPool getPostedTransactions() {
-        return posted;
-    }
-
-
-    /**
-     * Commences extraction of all the transactions, and assigns them to their corresponding attributes.
+     * Overrides the instance source from which the transactions are being parsed from.
      *
-     * @throws IOException
+     * @param statement A CreditStatement object that holds the path to the source
      */
-    private void extractTransactions(Document doc) throws IOException {
+    public void setSource(CreditStatement statement) throws IOException {
+        this.doc = Jsoup.parse(new File(statement.getAbsolutePath()), "UTF-8");
+    }
+
+    /**
+     * Overrides the instance source from which the transactions are being parsed from.
+     *
+     * @param statement A CreditStatement object that holds the path to the source
+     * @param charset   The charset name
+     */
+    public void setSource(CreditStatement statement, String charset) throws IOException {
+        this.doc = Jsoup.parse(new File(statement.getAbsolutePath()), charset);
+    }
+
+    /**
+     * Overrides the instance source from which the transactions are being parsed from.
+     *
+     * @param html A String object that stores the HTML
+     */
+    public void setSource(String html) {
+        this.doc = Jsoup.parse(html, "UTF-8");
+    }
+
+    /**
+     * Overrides the instance source from which the transactions are being parsed from.
+     *
+     * @param html A String object that stores the HTML
+     * @param charset The charset name
+     */
+    public void setSource(String html, String charset) {
+        this.doc = Jsoup.parse(html, charset);
+    }
+
+
+    /**
+     * Parses the source, instantiates transaction objects from the read data, and appends them to
+     * a TransactionPool.
+     *
+     * @return The TransactionPool object containing all read transactions.
+     */
+    public TransactionPool read() {
+        if (this.doc == null) {
+            return null;
+        }
+
+        return parseTransactions(this.doc);
+    }
+
+    /**
+     * parses the transactions present in the document.
+     *
+     * @param doc The JSoup document object
+     *
+     * @return A TransactionPool object containing all parsed transactions.
+     */
+    private TransactionPool parseTransactions(Document doc) {
+        TransactionPool p = new TransactionPool();
         Elements tables = doc.select("table");
 
-        if (tables.size() == 1) {
-            this.authorized = null;
-            this.posted = null;
-            this.transactions = null;
-        } else if (tables.size() == 2) {
-            Element posted = tables.get(POSTED_TRANSACTIONS - 1);
+        if (tables.isEmpty()) {
+            return null;
+        }
 
-            this.authorized = null;
-            this.posted = extractTransactions(posted, "posted");
+        tables.remove(0); // remove header table as it is useless
 
-            this.transactions = new TransactionPool();
-            this.transactions.addAll(this.posted);
-        } else if (tables.size() == 3) {
+        boolean hasAuthorized = tables.size() >= 2;
+        if (hasAuthorized) {
             Element authorized = tables.get(AUTHORIZED_TRANSACTIONS);
             Element posted = tables.get(POSTED_TRANSACTIONS);
 
-            this.authorized = extractTransactions(authorized, "authorized");
-            this.posted = extractTransactions(posted, "posted");
-
-            this.transactions = new TransactionPool();
-            this.transactions.addAll(this.authorized);
-            this.transactions.addAll(this.posted);
+            p.addAll(extractTransactions(authorized, true));
+            p.addAll(extractTransactions(posted, false));
+        } else if (!tables.isEmpty()) {
+            Element posted = tables.first();
+            p.addAll(extractTransactions(posted, false));
         }
+
+        return p;
     }
 
 
     /**
-     * Extracts all the authorized transactions, provided the authorized transactions table as a parameter.
+     * Extracts transactions from the provided table element.
      *
-     * @param table The Authorized transactions table Element
+     * @param table The JSoup element representing the table
+     *
      * @return A TransactionPool object of the Transactions.
      */
-    private TransactionPool extractTransactions(Element table, String type) {
+    private TransactionPool extractTransactions(Element table, boolean authorized) {
         TransactionPool transactions = new TransactionPool();
         Elements rows = table.getElementsByTag("tr");
         rows.remove(0); // this row is just for the headers of the table (description, pending debit, pending credit)
+
+        // all dates provided in the statement are in the format MMM dd, yyy (i.e Dec 14, 2015)
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 
         for (Element transaction : rows) {
             Elements data = transaction.getElementsByTag("td");
@@ -188,34 +200,21 @@ public class TransactionsExtractor {
             String description;
             double amount;
 
-            // all dates provided in the statement are in the format MMM dd, yyy (i.e Dec 14, 2015)
-            DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM dd, yyyy");
-
             // the date is set as the table header ('th' tag) for every row, and not a 'td' tag
             date = LocalDate.parse(transaction.getElementsByTag("th").get(0).html().trim(), format);
             description = data.get(TRANSACTION_DESCRIPTION).html().trim().replace("<br>", "");
             debit = data.get(TRANSACTION_DEBIT_AMOUNT);
             credit = data.get(TRANSACTION_CREDIT_AMOUNT);
 
-            /**
-             * The whole if-else block is mainly testing whether the current transaction of the iteration is
-             * a credit or a debit  transaction. If the debit amount column has no children (hence only the value),
-             * and it is not empty then it must be a debit transaction. Otherwise, the only other option is a
-             * credit transaction.
-             */
+            // categorizing the transaction as either a debit or credit transaction.
+            // A Debit transaction takes a negative sign to indicate a decrease in credit.
             if (debit.children().size() == 0 && !debit.html().isEmpty()) {
-                amount = Double.valueOf(data.get(TRANSACTION_DEBIT_AMOUNT).html().trim().replace("$", ""));
+                amount = Double.valueOf(debit.html().trim().replace("$", ""));
             } else {
-
-                /**
-                 * The amounts of credit are displayed in green, hence symbolizing a grant.
-                 * In order to get the amount, the inner class that makes the text green must be
-                 * accessed and its value taken.
-                 */
                 amount = - Double.valueOf(credit.html().trim().replace(",", "").replace("$", ""));
             }
 
-            transactions.add(new Transaction(description, date, amount, type.equals("authorized")));
+            transactions.add(new Transaction(description, date, amount, authorized));
         }
 
         return transactions;

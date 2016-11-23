@@ -29,12 +29,6 @@ import com.ccstats.analysis.worker.TransactionsExtractor;
  */
 public class Statement extends TransactionPool {
 
-
-    public Statement(TransactionsExtractor extractor) {
-        this(extractor.getTransactions());
-    }
-
-
     /**
      * Constructor for Statement. Calls the super method of the statistics class.
      *
