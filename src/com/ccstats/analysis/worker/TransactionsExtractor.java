@@ -142,19 +142,17 @@ public class TransactionsExtractor {
             return null;
         }
 
-        return parseTransactions(this.doc);
+        return parseTransactions();
     }
 
     /**
-     * parses the transactions present in the document.
-     *
-     * @param doc The JSoup document object
+     * Parses the transactions present in the document.
      *
      * @return A TransactionPool object containing all parsed transactions.
      */
-    private TransactionPool parseTransactions(Document doc) {
+    private TransactionPool parseTransactions() {
         TransactionPool p = new TransactionPool();
-        Elements tables = doc.select("table");
+        Elements tables = this.doc.select("table");
 
         if (tables.isEmpty()) {
             return null;

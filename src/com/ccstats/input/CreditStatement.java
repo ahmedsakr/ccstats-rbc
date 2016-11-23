@@ -42,7 +42,6 @@ public class CreditStatement {
      * file.
      *
      * @param filePath The path of the credit statement.
-     * @throws InvalidStatementPathException
      */
     public CreditStatement(String filePath) throws InvalidStatementPathException {
         this.filePath = Paths.get(filePath);

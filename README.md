@@ -62,7 +62,7 @@ try {
 
     // receives all transactions, and bundles them into a Statement object that has specific methods
     // regarding statements, in addition to the statistics method that the statement class inherits from.
-    Statement statement = new Statement(extractor);
+    Statement statement = new Statement(extractor.read());
 
     System.out.printf("I have a balance of %.2f.\n", statement.getBalance());
 
@@ -89,47 +89,45 @@ try {
 
 ```json
 {
-   "authorized_transactions":{
-      "transaction-1":{
-         "date":"548b2199a3cf674d8a6a9f99b6b13eeb17703f67e2056a2d80e032d6d7b093e29e6303f5fe458718c74463227b1b5b35c10c22a1",
-         "amount":"cc0bc0fd6342df35a0d5085d70a5e11445b44e21f3e7031519d3e051178a2698f3515c9cacf60b864d5ceb8777bb7ab3cf37311c",
-         "description":"96f3fb69b63c517ce3df6d19ae4b74377e6eec691ad34a2341d73d67975740ed095f2085999de46ba22ce9c0536849ba74346faeee52683b62068b6a0f143c95011b4d58"
-      }
-   },
-   "posted_transactions":{
-      "transaction-1":{
-         "date":"dfe1e91bb92acf285fe39f56ccb36e5ca20b8f9d05f936e035ccba654f042f66be284eb6beff68c1d0a813f32019a073c8ae714e",
-         "amount":"af632b332a08b75e2b158915383814656ba98e2e366125567bc3a1b2ee7883f1f4b258cd51a9bd5f576e3ddfed37f824a1fa2e51",
-         "description":"0f8ef7354a145681cb6849b6a480217506f8b306931a587f30b059337190570924ac5ad1fac5248b979ceec88b2f81caad8cf27c1ea4295157e844e857e4c5b3d2b97f3f"
-      },
-      "transaction-2":{
-         "date":"2e094e85d98e384356c6d4785dd6acfd742eafd7b4179dca3505f92a635758edc96bda9bf199fdd03e71dcdbbaef801cabff9434",
-         "amount":"167e5d93b890bbed104b1406e20f9d351d3a6dced1296f30aecde35fa77221b4bc916ee207f8fe6e95b96862cdaa23fd74532a85",
-         "description":"db25e8c2cd4e04818177e26f4bbbb5aa307daf3e7343b0bffb3f10596bcb781e840adb543d27897516a981ce21e14a684e0cd7cf2e0d663e3fe72a0b7064381aaaf30d9191585df52fc51e1936c6ced52b474ca9"
-      },
-      "transaction-3":{
-         "date":"9969a72b8fd6da7269d7e2386f6e198818afcf3d741fcf5ba00f3fef65d9faa9213eacd610556bb7b6fcf9e61f8e36a3de7e67aa",
-         "amount":"918459ed927d07db0e62e06869d828d29d798c762bb5862e9766756ccf6b856fb3fcbb2a986392295fc53f425d79054bf1036de1",
-         "description":"a3a7fcafdc2616f77b6d3b90913197b8584a8aaa132ec8ad50c2f2e3556a5b20a58b95ab71d1b55d081e6b25f105361d941ffa41fe5f34c669cdc08a53d81c29c072ef0dac8216868ecd35a40a54957ccbc3fd15"
-      }
-   }
+  "transactions":
+  {
+    "transaction-37":
+    {
+      "date":"b9a95bee74e7bbf805cbfda604fb4789c6ea4532bc7a4f6f6b9ff5e15bd1a53689d06bbdb0ecbada2935433cea777b6daf2724f3",
+      "amount":"c2a699b044785e7c3ca27320b7eb2b81808f74d369a4cf1d064f6888a3f8bc9875ece49394ba64a5d58a85c26b88c255d380e937",
+      "authorized":"3ae685e17dbdd00f87ad741c085f7c0f03a676de7ae3ee2e21eb3db0e5a2853a338399b37fa902b0dc2f2fccc301362bf2a7dc0e",
+      "description":"c5c861ce549ca1530bbe6d5ad55dc814eb9d5c679724435d6020aa19414cf3c69a049709a8a1b2532cff3e2737d9d5a66451f546cd5b8d89dc55e7a723738f2d56c269b75410ad2415000a0c58580838f996a63e589c526ec813746e5aa3d0e223a4eefe"
+    },
+    
+    "transaction-36":
+    {
+      "date":"2d29217017aad8b969104b5afbf6d29d7e490a8615a0da2971bd0f707f133dfd0636f5194f1d14fc16f85ffd91c8fe270bdbb4df",
+      "amount":"3965eb1c0617606b5699944f5d6715d85c83248169a8d7ab0f4845ed216cb876c67ee38c16b6f71843bbc206b81cbb35c8f06218",
+      "authorized":"76cc0b5a01dfcf80ae6c712d960acf18ff4fa1b4e09ed45a63e46a5816f3577a4b13ef8aedea8b754c3d28811a5f59b3f8ee03bf",
+      "description":"140ed49bd3c0c67c98879ead9d394c9fea78524a05813cadd1569c781a11892c85378667160dbc98d148322bb93d0d41e5968a6c48e4e97eba11e983f802a45e41b0c9bd"
+    }
+    
+    ...
+  }  
 }
 ```
 
 Releases
 =====
----
 
-**WARNING**: Releases **[0.1.00, 0.1.42]** have been deprecated in result of the data-extraction algorithm becoming
+**Latest build**: [v0.2.5](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.2.5)
+
+**Version Date**: November the 23rd, 2016
+
+Notices
+=====
+1) Releases **[0.1.00, 0.1.42]** have been deprecated in result of the data-extraction algorithm becoming
 obsolete due to RBC discontinuing the old UI. Statements produced from the new UI will not work with these versions.
 Please consider installing **v0.1.43** or later.
 
-**WARNING**: Release **0.1.35** has been detected to fail at collecting transactions correctly. A critical update
+2) Release **0.1.35** has been detected to fail at collecting transactions correctly. A critical update
 has been applied and is now effective as of **0.1.40**.
-
-**Latest build**: v[0.2.2](https://github.com/ahmedsakr/ccstats-rbc/releases/tag/0.2.2)
 
 License
 ====
----
 This library is licensed under the [Apache 2.0 GNU](http://www.apache.org/licenses/LICENSE-2.0) License.
