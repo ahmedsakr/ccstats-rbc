@@ -151,28 +151,24 @@ public class TransactionsExtractor {
      * @return A TransactionPool object containing all parsed transactions.
      */
     private TransactionPool parseTransactions() {
-        TransactionPool p = new TransactionPool();
         Elements tables = this.doc.select("table");
 
-        if (tables.isEmpty()) {
+        // checking, before and after removing the header table, if the tables json array is empty.
+        if (tables.isEmpty() || tables.remove(0) == null || tables.isEmpty()) {
             return null;
+        } else if (tables.size() >= 2) {
+            TransactionPool p;
+
+            p = extractTransactions(tables.get(AUTHORIZED_TRANSACTIONS), true);
+            p.addAll(extractTransactions(tables.get(POSTED_TRANSACTIONS), false));
+
+            return p;
+        } else {
+
+            // there is only posted or authorized transactions.
+            // TODO: investigate solution for incorrect "false" value passing of authorized parameter.
+            return extractTransactions(tables.first(), false);
         }
-
-        tables.remove(0); // remove header table as it is useless
-
-        boolean hasAuthorized = tables.size() >= 2;
-        if (hasAuthorized) {
-            Element authorized = tables.get(AUTHORIZED_TRANSACTIONS);
-            Element posted = tables.get(POSTED_TRANSACTIONS);
-
-            p.addAll(extractTransactions(authorized, true));
-            p.addAll(extractTransactions(posted, false));
-        } else if (!tables.isEmpty()) {
-            Element posted = tables.first();
-            p.addAll(extractTransactions(posted, false));
-        }
-
-        return p;
     }
 
 
@@ -184,6 +180,7 @@ public class TransactionsExtractor {
      * @return A TransactionPool object of the Transactions.
      */
     private TransactionPool extractTransactions(Element table, boolean authorized) {
+        String[] descriptionFillers = new String[]{"<br>", "<!-- FCOO  -->", "\n"};
         TransactionPool transactions = new TransactionPool();
         Elements rows = table.getElementsByTag("tr");
         rows.remove(0); // this row is just for the headers of the table (description, pending debit, pending credit)
@@ -200,7 +197,11 @@ public class TransactionsExtractor {
 
             // the date is set as the table header ('th' tag) for every row, and not a 'td' tag
             date = LocalDate.parse(transaction.getElementsByTag("th").get(0).html().trim(), format);
-            description = data.get(TRANSACTION_DESCRIPTION).html().trim().replace("<br>", "");
+            description = data.get(TRANSACTION_DESCRIPTION).html().trim();
+            for (String filler : descriptionFillers) {
+                description = description.replace(filler, "");
+            }
+
             debit = data.get(TRANSACTION_DEBIT_AMOUNT);
             credit = data.get(TRANSACTION_CREDIT_AMOUNT);
 

@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -346,20 +347,27 @@ public class TransactionPool extends ArrayList<Transaction> {
      * to the keyword are acquired.
      *
      * @param keyword The keyword used to select transactions
-     * @param startWith whether the transaction's description should be equal or startWith the keyword.
+     * @param contains whether the transaction's description should be equal or startWith the keyword.
      *
      * @return The TransactionPool object of the transactions.
      */
-    public TransactionPool getTransactionsByDescription(String keyword, boolean startWith) {
+    public TransactionPool getTransactionsByDescription(String keyword, boolean contains) {
         TransactionPool pool = new TransactionPool();
         for (Transaction transaction : this) {
             if (transaction.getDescription().equalsIgnoreCase(keyword)
-                    || (startWith && transaction.getDescription().startsWith(keyword))) {
+                    || (contains && transaction.getDescription().contains(keyword))) {
                 pool.add(transaction);
             }
         }
 
         return pool;
+    }
+
+
+    public boolean removeTransactionsByKeyword(String keyword) {
+        final String key = keyword.toLowerCase();
+        Object[] removables = this.stream().filter(a -> a.getDescription().toLowerCase().contains(key)).toArray();
+        return this.removeAll(Arrays.asList(removables));
     }
 
 
