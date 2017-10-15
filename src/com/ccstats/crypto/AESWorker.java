@@ -36,8 +36,31 @@ import java.security.spec.InvalidParameterSpecException;
  * @since February 28, 2016.
  */
 public class AESWorker {
+    
+    // the default value the worker will assume wit be 256 bits for the key length.
+    private int keyLength = 256;
 
-    private boolean keyBitLengthWarned;
+
+    /**
+     * Returns the running key length of this worker instance.
+     *
+     * @return an integer key length value
+     */
+    public int getKeyLength() {
+        return this.keyLength;
+    }
+
+
+    /**
+     * Sets the running key length of this worker instance. Any value bigger than
+     * the maximum policy will be automatically reduced to the maximum policy.
+     * IMPORTANT: Value must be power of two.
+     *
+     * @param keyLength the new key length in bits
+     */
+    public void setKeyLength(int keyLength) {
+        this.keyLength = keyLength;
+    }
 
     /**
      * Through the power of the advanced encryption standard, a plaintext will be encrypted with a parameter-specified
@@ -50,23 +73,18 @@ public class AESWorker {
      *
      * @param password the password as a char array.
      * @param text The plaintext bytes to be encrypted.
-     * @param keyLength The length in bits of the key.
      *
      * @return The Encrypted text in hexadecimal format.
      */
-    public char[] encrypt(char[] password, byte[] text, int keyLength) throws NoSuchAlgorithmException,
+    public char[] encrypt(char[] password, byte[] text) throws NoSuchAlgorithmException,
             InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException,
             BadPaddingException, IllegalBlockSizeException {
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        int maxKeyLength = Cipher.getMaxAllowedKeyLength("AES");
-        if (maxKeyLength < keyLength) {
-            keyLength = maxKeyLength;
-            if (!keyBitLengthWarned) {
-                System.err.printf("WARNING: YOUR MAXIMUM AES KEY LENGTH POLICY IS %d BITS. KEY LENGTH LIMITED TO %d BITS.\n",
-                        maxKeyLength, maxKeyLength);
-            }
-            keyBitLengthWarned = true;
+        if (Cipher.getMaxAllowedKeyLength("AES") < this.keyLength) {
+            this.keyLength = Cipher.getMaxAllowedKeyLength("AES");
+            System.err.printf("WARNING: YOUR MAXIMUM AES KEY LENGTH POLICY IS %d BITS. KEY LENGTH LIMITED TO %d BITS.\n",
+                            this.keyLength, this.keyLength);
         }
 
         // hash the password and acquire a securely and randomly generated salt
@@ -76,7 +94,7 @@ public class AESWorker {
 
         // acquire the key
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        PBEKeySpec spec = new PBEKeySpec(password, salt, 16384, keyLength);
+        PBEKeySpec spec = new PBEKeySpec(password, salt, 16384, this.keyLength);
         SecretKey key = factory.generateSecret(spec);
         SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
 
@@ -91,38 +109,6 @@ public class AESWorker {
 
 
     /**
-     * An override of the encrypt method with the password parameter of type String,
-     * and with the option to specify the key length in bits as a parameter.
-     *
-     * @param password The password used to encrypt the text.
-     * @param text The text to be encrypted using the advanced encryption standard.
-     * @param keyLength The length of the key in bits.
-     *
-     * @return The bytes of encrypted text.
-     */
-    public char[] encrypt(String password, String text, int keyLength) throws NoSuchAlgorithmException,
-            InvalidKeySpecException , NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException,
-            BadPaddingException, IllegalBlockSizeException {
-        return encrypt(password.toCharArray(), text.getBytes(StandardCharsets.UTF_8), keyLength);
-    }
-
-
-    /**
-     * An override of the encrypt method with the default AES key length set to be 256 bits.
-     *
-     * @param password The password used to encrypt the text.
-     * @param text The text to be encrypted using the advanced encryption standard.
-     *
-     * @return The bytes of encrypted text.
-     */
-    public char[] encrypt(char[] password, byte[] text) throws NoSuchPaddingException, NoSuchAlgorithmException,
-            IllegalBlockSizeException, BadPaddingException, InvalidParameterSpecException, InvalidKeyException,
-            InvalidKeySpecException {
-        return encrypt(password, text, 256);
-    }
-
-
-    /**
      * An override of the encrypt method with a default keyLength value of 256-bits.
      *
      * @param password The password used to encrypt the text.
@@ -133,7 +119,7 @@ public class AESWorker {
     public char[] encrypt(String password, String text) throws NoSuchAlgorithmException, InvalidKeySpecException,
             NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, BadPaddingException,
             IllegalBlockSizeException {
-        return encrypt(password.toCharArray(), text.getBytes(StandardCharsets.UTF_8), 256);
+        return encrypt(password.toCharArray(), text.getBytes(StandardCharsets.UTF_8));
     }
 
 
@@ -142,24 +128,18 @@ public class AESWorker {
      *
      * @param password The char array containing of the plaintext password
      * @param encryptedBlock The Encrypted text to be targeted and decrypted.
-     * @param keyLength The AES Key length in bits.
      *
      * @return The decrypted byte array of the encrypted text.
      */
-    public byte[] decrypt(char[] password, char[] encryptedBlock, int keyLength) throws NoSuchAlgorithmException,
+    public byte[] decrypt(char[] password, char[] encryptedBlock) throws NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException, BadPaddingException,
             IllegalBlockSizeException, InvalidAlgorithmParameterException, DecoderException {
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        int maxKeyLength = Cipher.getMaxAllowedKeyLength("AES");
-
-        if (maxKeyLength < keyLength) {
-            keyLength = maxKeyLength;
-            if (!keyBitLengthWarned) {
-                System.err.printf("WARNING: YOUR MAXIMUM AES KEY LENGTH POLICY IS %d BITS. KEY LENGTH LIMITED TO %d BITS.\n",
-                        maxKeyLength, maxKeyLength);
-                keyBitLengthWarned = true;
-            }
+        if (Cipher.getMaxAllowedKeyLength("AES") < this.keyLength) {
+            this.keyLength = Cipher.getMaxAllowedKeyLength("AES");
+            System.err.printf("WARNING: YOUR MAXIMUM AES KEY LENGTH POLICY IS %d BITS. KEY LENGTH LIMITED TO %d BITS.\n",
+                        this.keyLength, this.keyLength);
         }
 
         // hash the password with the MD5 function and decode the encryptedBlock
@@ -178,30 +158,13 @@ public class AESWorker {
 
         // generate the key from the acquired data
         SecretKeyFactory factory = SecretKeyFactory .getInstance("PBKDF2WithHmacSHA1");
-        PBEKeySpec spec = new PBEKeySpec(password, salt, 16384, keyLength);
+        PBEKeySpec spec = new PBEKeySpec(password, salt, 16384, this.keyLength);
         SecretKey key = factory.generateSecret(spec);
         SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
 
         // finally, attempt to decrypt the encryptedText
         cipher.init(Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(ivBytes));
         return cipher.doFinal(encryptedText);
-    }
-
-
-    /**
-     * An override of the decrypt method with the ability to provide the password and encryptedText as String
-     * objects.
-     *
-     * @param password The plaintext password as a String.
-     * @param encryptedText The encrypted text as a String.
-     * @param keyLength The AES Key length in bits.
-     *
-     * @return The decrypted byte array of the encrypted text.
-     */
-    public byte[] decrypt(String password, String encryptedText, int keyLength) throws NoSuchPaddingException,
-            DecoderException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException,
-            BadPaddingException, InvalidKeyException, InvalidKeySpecException {
-        return decrypt(password.toCharArray(), encryptedText.toCharArray(), keyLength);
     }
 
 
@@ -217,24 +180,7 @@ public class AESWorker {
     public byte[] decrypt(String password, String encryptedText) throws NoSuchPaddingException, DecoderException,
             InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException,
             BadPaddingException, InvalidKeyException, InvalidKeySpecException {
-        return decrypt(password.toCharArray(), encryptedText.toCharArray(), 256);
-    }
-
-
-    /**
-     * An override of the decrypt method with the ability to provide the password and encryptedText as character
-     * arrays, and attempt to extract the latest ivBytes and salt for usage. The Default AES Key length is set to
-     * 256 bits.
-     *
-     * @param password The plaintext password as a char array.
-     * @param encryptedText The encrypted text as a char array.
-     *
-     * @return The decrypted byte array of the encrypted text.
-     */
-    public byte[] decrypt(char[] password, char[] encryptedText) throws NoSuchPaddingException, InvalidKeyException,
-            DecoderException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException,
-            InvalidAlgorithmParameterException, InvalidKeySpecException {
-        return decrypt(password, encryptedText, 256);
+        return decrypt(password.toCharArray(), encryptedText.toCharArray());
     }
 
 

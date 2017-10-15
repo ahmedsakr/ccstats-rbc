@@ -26,6 +26,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import javax.crypto.Cipher;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -103,7 +104,7 @@ public class JSONEncryptedStatement {
             JSONObject transactionObj;
             Transaction transaction;
 
-            if (statement != null && !statement.isEmpty()) {
+            if (!statement.isEmpty()) {
                 for (int i = 0; i < statement.size(); i++) {
                     transaction = statement.get(i);
                     transactionObj = new JSONObject();
@@ -126,6 +127,7 @@ public class JSONEncryptedStatement {
             e.printStackTrace();
         }
 
+        main.put("aes-key-length", String.valueOf(worker.getKeyLength()));
         main.put("transactions", transactions);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(absolutePath, false))) {
             writer.write(main.toJSONString());
@@ -187,6 +189,7 @@ public class JSONEncryptedStatement {
         JSONObject main = (JSONObject) parser.parse(new FileReader(absolutePath));
         JSONObject encryptedTransactions = (JSONObject) main.get("transactions");
 
+        worker.setKeyLength(Integer.valueOf((String) main.get("aes-key-length")));
         try {
 
             JSONObject current;
