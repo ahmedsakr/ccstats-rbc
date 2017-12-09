@@ -19,32 +19,58 @@ public class Test {
 
 
     public static void main(String[] args) {
-        try {
-            if (args.length < 2) {
-                System.err.println("Invalid number of args.");
-                System.exit(1);
-            }
+        if (args.length < 2) {
+            System.err.println("Invalid number of args.");
+            System.exit(1);
+        }
 
+        String[][] billingDates = {
+                {"Sep 01, 2017", "Sep 07, 2017"}, {"Sep 08, 2017", "Sep 14, 2017"}, {"Sep 15, 2017", "Sep 21, 2017"},
+                {"Sep 22, 2017", "Sep 28, 2017"}, {"Sep 29, 2017", "Sep 30, 2017"}, {"Oct 01, 2017", "Oct 07, 2017"},
+                {"Oct 08, 2017", "Oct 14, 2017"}, {"Oct 15, 2017", "Oct 21, 2017"}, {"Oct 22, 2017", "Oct 28, 2017"},
+                {"Oct 29, 2017", "Nov 04, 2017"}, {"Nov 05, 2017", "Nov 11, 2017"}, {"Nov 12, 2017", "Nov 18, 2017"},
+                {"Nov 19, 2017", "Nov 25, 2017"}, {"Nov 26, 2017", "Dec 02, 2017"}, {"Dec 03, 2017", "Dec 09, 2017"},
+        };
+
+        statistics(args[0], billingDates, args[1]);
+        //merge(args[0],"/home/ahmed/Downloads/9787-statement.html", "Nov 23, 2017", "Dec 08, 2017", args[1]);
+
+    }
+    public static void statistics(String statement, String[][] weeks, String password) {
+        try {
             JSONEncryptedStatement io = new JSONEncryptedStatement();
-            Statement master = io.read(args[0], args[1]);
+            Statement master = io.read(statement, password);
 
             TransactionPool credit = master.getCreditTransactions();
-            String[][] billingDates = {
-                    {"Sep 01, 2017", "Sep 07, 2017"}, {"Sep 08, 2017", "Sep 14, 2017"}, {"Sep 15, 2017", "Sep 21, 2017"},
-                    {"Sep 22, 2017", "Sep 28, 2017"}, {"Sep 29, 2017", "Sep 30, 2017"}, {"Oct 01, 2017", "Oct 07, 2017"},
-                    {"Oct 08, 2017", "Oct 14, 2017"}
-            };
-
             TransactionPool transactions;
-            for (String[] dates : billingDates) {
-                System.out.printf("Transactions statistics for %s -> %s:\n---\n", dates[0], dates[1]);
-                transactions = credit.getTransactionsFrom(dates[0], dates[1]);
+            for (String[] week : weeks) {
+                System.out.printf("Transactions statistics for %s -> %s:\n---\n", week[0], week[1]);
+                transactions = credit.getTransactionsFrom(week[0], week[1]);
                 System.out.printf("Balance: $%.2f\n", transactions.getBalance());
                 System.out.printf("Average / Day: $%.2f\n", transactions.getAverageDay());
                 System.out.printf("Standard Deviation: +/- $%.2f\n", transactions.getStandardDeviation());
                 System.out.printf("# of transactions: %d\n---\n", transactions.size());
             }
+
+            System.out.println("Total spent since september: " + credit.getBalance());
         } catch (IOException | ParseException | BadPaddingException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void merge(String master, String child, String from, String to, String password) {
+        try {
+            JSONEncryptedStatement io = new JSONEncryptedStatement();
+            Statement masterStatement = io.read(master, password);
+
+            TransactionsExtractor extractor = new TransactionsExtractor(new CreditStatement(child));
+            Statement childStatement = new Statement(new Statement(extractor.read()).getCreditTransactions().getTransactionsFrom(from, to));
+            masterStatement.merge(childStatement);
+
+            io.setStatement(masterStatement);
+            io.write(master, password);
+        } catch (IOException | ParseException | BadPaddingException | InvalidStatementPathException e) {
             e.printStackTrace();
         }
     }
