@@ -124,7 +124,7 @@ public class Transaction {
             Transaction transaction = (Transaction) other;
             boolean equalAmount = this.getAmount() == transaction.getAmount();
             boolean equalName = this.getDescription().equals(transaction.getDescription());
-            return equalAmount && equalName;
+            return equalAmount && equalName && transaction.isAuthorized() == this.isAuthorized();
         }
     }
 

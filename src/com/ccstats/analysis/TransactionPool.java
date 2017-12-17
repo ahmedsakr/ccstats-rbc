@@ -364,12 +364,31 @@ public class TransactionPool extends ArrayList<Transaction> {
     }
 
 
+    /**
+     * Removes all transactions that contain the specified keyword.
+     *
+     * @param keyword The keyword which is used to find the matching transactions by comparing their descriptions.
+     *
+     * @return  the status of the removal.
+     */
     public boolean removeTransactionsByKeyword(String keyword) {
         final String key = keyword.toLowerCase();
         Object[] removables = this.stream().filter(a -> a.getDescription().toLowerCase().contains(key)).toArray();
         return this.removeAll(Arrays.asList(removables));
     }
 
+
+    /**
+     * Removes all transactions that are equivalent to the transaction argument.
+     *
+     * @param transaction The transaction that is used as the comporator for targets.
+     * @return  the status of the removal.
+     *
+     */
+    public boolean removeTransactionsByEquivalence(Transaction transaction) {
+        Object[] removables = this.stream().filter(a -> a.equals(transaction)).toArray();
+        return this.removeAll(Arrays.asList(removables));
+    }
 
     /**
      * Computes and gathers all transactions that are equal to the provided transaction object. In other words,
