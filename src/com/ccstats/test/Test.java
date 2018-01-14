@@ -25,15 +25,17 @@ public class Test {
         }
 
         String[][] billingDates = {
-                {"Sep 01, 2017", "Sep 07, 2017"}, {"Sep 08, 2017", "Sep 14, 2017"}, {"Sep 15, 2017", "Sep 21, 2017"},
-                {"Sep 22, 2017", "Sep 28, 2017"}, {"Sep 29, 2017", "Sep 30, 2017"}, {"Oct 01, 2017", "Oct 07, 2017"},
-                {"Oct 08, 2017", "Oct 14, 2017"}, {"Oct 15, 2017", "Oct 21, 2017"}, {"Oct 22, 2017", "Oct 28, 2017"},
-                {"Oct 29, 2017", "Nov 04, 2017"}, {"Nov 05, 2017", "Nov 11, 2017"}, {"Nov 12, 2017", "Nov 18, 2017"},
-                {"Nov 19, 2017", "Nov 25, 2017"}, {"Nov 26, 2017", "Dec 02, 2017"}, {"Dec 03, 2017", "Dec 09, 2017"},
+            {"Sep 01, 2017", "Sep 07, 2017"}, {"Sep 08, 2017", "Sep 14, 2017"}, {"Sep 15, 2017", "Sep 21, 2017"},
+            {"Sep 22, 2017", "Sep 28, 2017"}, {"Sep 29, 2017", "Sep 30, 2017"}, {"Oct 01, 2017", "Oct 07, 2017"},
+            {"Oct 08, 2017", "Oct 14, 2017"}, {"Oct 15, 2017", "Oct 21, 2017"}, {"Oct 22, 2017", "Oct 28, 2017"},
+            {"Oct 29, 2017", "Nov 04, 2017"}, {"Nov 05, 2017", "Nov 11, 2017"}, {"Nov 12, 2017", "Nov 18, 2017"},
+            {"Nov 19, 2017", "Nov 25, 2017"}, {"Nov 26, 2017", "Dec 02, 2017"}, {"Dec 03, 2017", "Dec 09, 2017"},
+            {"Dec 10, 2017", "Dec 16, 2017"}, {"Dec 17, 2017", "Dec 23, 2017"}, {"Dec 24, 2017", "Dec 30, 2017"},
+            {"Dec 31, 2017", "Jan 06, 2018"}, {"Jan 07, 2018", "Jan 13, 2018"}
         };
 
         statistics(args[0], billingDates, args[1]);
-        //merge(args[0],"/home/ahmed/Downloads/9787-statement.html", "Nov 23, 2017", "Dec 08, 2017", args[1]);
+        //merge(args[0],"/home/asakr/Downloads/9787-statement.html", "Dec 16, 2017", "Jan 13, 2018", args[1]);
 
     }
     public static void statistics(String statement, String[][] weeks, String password) {
